@@ -1,0 +1,15 @@
+{
+  http: {
+    default: {
+      port: 4080
+    }
+  },
+  auth: {
+    test: {
+      driver: './test/config/auth',
+      options: {
+
+      }
+    }
+  }
+}

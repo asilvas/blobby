@@ -1,0 +1,54 @@
+{
+  "name": "blobby",
+  "version": "0.1.0",
+  "description": "To be announced",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel ./src --out-dir ./lib",
+    "clean": "rimraf ./lib",
+    "prepublish": "npm run clean && npm run build",
+    "start": "./bin/blobby server --config-dir ./test/config --config-base defaults",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "babel ./src --out-dir ./lib --watch"
+  },
+  "bin": {
+    "blobby": "./bin/blobby"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asilvas/blobby.git"
+  },
+  "author": "Aaron Silvas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/asilvas/blobby/issues"
+  },
+  "homepage": "https://github.com/asilvas/blobby#readme",
+  "dependencies": {
+    "async": "^2.3.0",
+    "bytes": "^2.5.0",
+    "chalk": "^1.1.3",
+    "config-shield": "^0.2.0",
+    "json5": "^0.5.1",
+    "merge": "^1.2.0",
+    "mime-types": "^2.1.15",
+    "mkdirp": "^0.5.1",
+    "terminal-kit": "^1.4.1",
+    "tty-table": "^2.2.5",
+    "yargs": "^7.0.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.3.3",
+    "rimraf": "^2.6.1"
+  },
+  "files": [
+    "lib",
+    "src",
+    "index.js",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ]
+}

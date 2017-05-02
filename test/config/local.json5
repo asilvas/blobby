@@ -1,0 +1,20 @@
+{
+  storage: {
+    local: {
+      driver: './lib/storage/fs',
+      options: {
+        path: './test/fs/local1'
+      },
+      auth: 'test',
+      replicas: ['local2', 'local-alt::local']
+    },
+    local2: {
+      driver: './lib/storage/fs',
+      options: {
+        path: './test/fs/local2'
+      },
+      auth: 'test',
+      replicas: ['local', 'local-alt::local']
+    }
+  }
+}
