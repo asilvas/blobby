@@ -1,7 +1,7 @@
 {
   storage: {
     local: {
-      driver: './lib/storage/fs',
+      driver: 'blobby-fs',
       options: {
         path: './test/fs/local-alt1'
       },
@@ -9,7 +9,7 @@
       replicas: ['local2', 'local::local']
     },
     local2: {
-      driver: './lib/storage/fs',
+      driver: 'blobby-fs',
       options: {
         path: './test/fs/local2' // example of reading/writing to a remote as primary replica
       },

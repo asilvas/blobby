@@ -6,9 +6,9 @@
   },
   auth: {
     test: {
-      driver: './test/config/auth',
+      driver: 'blobby-auth-header',
       options: {
-
+        apiKey: 'shhMySecret'
       }
     }
   }
