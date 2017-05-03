@@ -16,15 +16,10 @@ export default opts => {
   if (driver) return getAuthHandler(req, fileKey, storage.id, authId, authConfig, driver); // already cached
 
   if (!driver) {
-    let mod;
-    try {
-      // try the standard way first
-      mod = require(authConfig.driver);
-    } catch (ex) {
-      // if relative path, resolve first
-      // todo: make this flow more efficient for relative cases -- exception handling isn't ideal
-      mod = require(path.resolve(authConfig.driver));
-    }
+    const absPath = path.isAbsolute(authConfig.driver) ? authConfig.driver // already absolute path
+      : path.resolve(process.cwd(), 'node_modules/' + authConfig.driver) // typical 
+    ;
+    const mod = require(absPath);
     driver = mod.default || mod; // support ES Modules & CommonJS
     if (!driver) return console.error(`Unable to load auth driver ${authConfig.driver}`); // no driver detected
     g_AuthDrivers[configAuthId] = driver; // cache
