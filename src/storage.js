@@ -5,15 +5,10 @@ export default function getClient(config, storageId) {
   const storeConfig = config.storage[storageId];
   if (!storeConfig) throw new Error('Configuration not found for storage ' + storageId);
   storeConfig.cacheControl = storeConfig.cacheControl || 'public,max-age=31536000';
-
-  let mod;
-  try {
-    // try the standard way first
-    mod = require(storeConfig.driver);
-  } catch (ex) {
-    // if relative path, resolve first
-    mod = require(path.resolve(storeConfig.driver));
-  }
+  const absPath = path.isAbsolute(storeConfig.driver) ? storeConfig.driver // already absolute path
+    : path.resolve(process.cwd(), 'node_modules/' + storeConfig.driver) // typical 
+  ;
+  const mod = mod = require(absPath);
   const Driver = mod.default || mod; // support ES Modules & CommonJS
   const instance = new Driver(storeConfig.options || {});
   instance.id = storageId;
