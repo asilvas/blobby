@@ -136,6 +136,27 @@ Start HTTP Server using the provided [Configuration](#configuration).
 blobby server
 ```
 
+### REST API
+
+| Method | Route | Auth | Info |
+| --- | --- | --- | --- |
+| `GET` | `/{storageId}/{filePath}` | Public | Get a file from storage |
+| `HEAD` | `/{storageId}/{filePath}` | Public | Get info for file from storage |
+| `PUT` | `/{storageId}/{filePath}` | Secure | Create or overwrite file in storage |
+| `DELETE` | `{storageId}/{filePath}` | Secure | Delete file from storage |
+| `GET` | `{storageId}/{directoryPath}/` | Secure | Get directory contents by postfixing the path with `/` |
+
+Example Usage:
+```
+curl -XPUT -H "Authorization: ApiKey shhMySecret" --data-binary "@./some-file.jpg" http://localhost/myStorage/some/file.jpg
+curl -XHEAD http://localhost/myStorage/some/file.jpg
+curl http://localhost/myStorage/some/file.jpg
+curl -H "Authorization: ApiKey shhMySecret" http://localhost/myStorage/some/
+curl -XDELETE -H "Authorization: ApiKey shhMySecret" http://localhost/myStorage/some/file.jpg
+```
+
+The above examples is a perfect segway into [Secure API Operations](#secure-api-operations).
+
 
 ### Secure API Operations
 
