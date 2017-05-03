@@ -5,6 +5,7 @@ import mimeTypes from 'mime-types';
 import path from 'path';
 import headFile from './head-file';
 import getFile from './get-file';
+import getFiles from './get-files';
 import putFile from './put-file';
 import deleteFile from './delete-file';
 import getAuthHandler from './get-auth';
@@ -18,7 +19,7 @@ export default (argv, config) => {
     try {
       storage = getStorage(config, storageId);
     } catch (ex) {
-      console.warn(chalk.yellow(ex));
+      console.warn(chalk.yellow(ex.stack || ex));
 
       res.statusMessage = 'Invalid storage';
       res.statusCode = 404;
@@ -35,7 +36,8 @@ export default (argv, config) => {
         headFile(opts);
         break;
       case 'GET':
-        getFile(opts);
+        if (pathParts[pathParts.length - 1] === '') getFiles(opts); // if path ends in `/` it's a directory request
+        else getFile(opts);
         break;
       case 'PUT':
         putFile(opts);
