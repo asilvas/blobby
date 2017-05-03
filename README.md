@@ -50,7 +50,7 @@ blobby help
 
 A number of configuration formats are supported, including
 JSON, [JSON5](http://json5.org/), CommonJS, and
-[Secure Configurations](#Secure_Configuration).
+[Secure Configurations](#secure-sonfiguration).
 
 | Option | Type | Default | Desc |
 | --- | --- | --- | --- |
@@ -63,7 +63,7 @@ JSON, [JSON5](http://json5.org/), CommonJS, and
 | secure-config | string | none | Directory of secure configuration files |
 | secure-secret | string | none | The secret required to decrypt secure configuration files |
 | secure-file | string | none | File to load that holds the secret required to decrypt secure configuration files |
-| mode | string | `"fast"` | Used when comparing files. For usage see [Compare Modes](#Compare_Modes) |
+| mode | string | `"headers"` | Used when comparing files. For usage see [Compare Modes](#compare-modes) |
 
 Example using the default `NODE_ENV` environment variable to load config data:
 
@@ -91,8 +91,8 @@ blobby server --config-dir lib/config
 | storage.{id}.cacheControl | string | `"public,max-age=31536000"` | Default cache control headers to apply for GET's and PUT's if file does not provide it |
 | storage.{id}.driver | string | (required) | Module name/path to use as storage client |
 | storage.{id}.dirSplit | number | false | (future) If Number, auto-split paths every N characters to make listing of directories much faster |
-| storage.{id}.auth | string | none | Required to support Uploads and Deletes, see [Secure API Operations](#Secure_API_Operations) |
-| storage.{id}.replicas | arrayOf(string) | `[]` | Required to support Replication, see [File Replication](#File_Replication) |
+| storage.{id}.auth | string | none | Required to support Uploads and Deletes, see [Secure API Operations](#secure-api-operations) |
+| storage.{id}.replicas | arrayOf(string) | `[]` | Required to support Replication, see [File Replication](#file-replication) |
 | storage.{id}.options | Object | {} | Options provided to storage driver |
 
 ### Storage Drivers
@@ -130,7 +130,7 @@ more advanced usage.
 
 ## Server
 
-Start HTTP Server using the provided [Configuration](#Configuration).
+Start HTTP Server using the provided [Configuration](#configuration).
 
 ```
 blobby server
@@ -139,7 +139,7 @@ blobby server
 
 ### Secure API Operations
 
-As indicated in [Configuration](#Configuration), `storage.{id}.auth` is required to support uploads and deletes.
+As indicated in [Configuration](#configuration), `storage.{id}.auth` is required to support uploads and deletes.
 
 Example Config:
 
@@ -175,7 +175,7 @@ Your handler can be synchronous or asynchronous, but `cb` must be invoked in eit
 
 ### File Replication
 
-As indicated in [Configuration](#Configuration), `storage.{id}.replicas` is required to enabled
+As indicated in [Configuration](#configuration), `storage.{id}.replicas` is required to enabled
 replication. An array of one or more replicas can be provided, consisting of the storage identifier
 and optionally the configuration if the desired storage exists in a different environment (such
 as replication across data centers).
@@ -272,7 +272,7 @@ Example of syncing two storage across 2 datacenters:
 blobby repair old new --config dc1 dc2
 ```
 
-For usage of `mode`, see [Compare Modes](#Compare_Modes).
+For usage of `mode`, see [Compare Modes](#compare-modes).
 
 
 ## Stats
