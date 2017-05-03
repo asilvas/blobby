@@ -1,6 +1,6 @@
 {
   "name": "blobby-s3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An S3 client for Blobby, powered by Knox",
   "main": "index.js",
   "scripts": {

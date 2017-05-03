@@ -176,7 +176,7 @@ export default class BlobbyS3 {
     opts = opts || {};
 
     const params = {
-      prefix: dir,
+      prefix: dir + ((dir.length === 0 || dir[dir.length - 1] === '/') ? '' : '/'), // prefix must always end with `/` if not root
       delimiter: opts.deepQuery ? '' : '/'
     };
     let forcedBucketIndex;
@@ -187,13 +187,13 @@ export default class BlobbyS3 {
       if (lastKeySplit.length > 1) { // only set a (resume) marker if one was provided
         params.marker = lastKeySplit.slice(1).join(':'); // rebuild marker after removing index
       }
-    } else if (typeof bucketStart === 'number' && typeof bucketEnd === 'number') {
-      // if no key provided, default forcedBucketIndex
+    } else if (opts.deepQuery && typeof bucketStart === 'number' && typeof bucketEnd === 'number') {
+      // if no key provided, doing a deep query, default forcedBucketIndex
       forcedBucketIndex = bucketStart;
     }
     if (opts.maxKeys) params['max-keys'] = opts.maxKeys;
 
-    const client = this.getClient(dir, forcedBucketIndex);    
+    const client = this.getClient(dir, forcedBucketIndex);
     client.list(params, (err, data, data2) => {
       if (err) return cb(err);
       if (data.Code) return cb(new Error(data.Code));
