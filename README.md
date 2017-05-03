@@ -193,6 +193,10 @@ module.exports = function(req, storageId, fileKey, authConfig, cb) {
 
 Your handler can be synchronous or asynchronous, but `cb` must be invoked in either case.
 
+#### Authorization Drivers
+
+* [Authorization Header](https://github.com/asilvas/blobby-auth-header) - An HTTP Authorization client.
+
 
 ### File Replication
 
