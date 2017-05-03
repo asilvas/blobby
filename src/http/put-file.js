@@ -12,7 +12,9 @@ export default opts => {
   }
 
   // use request content-type if known, otherwise try to auto-detect
-  const ContentType = headers['content-type'] !== 'binary/octet-stream' ? headers['content-type'] : contentType;
+  const headerContentType = headers['content-type'];
+  // use content-type provided by header if explicit enough, otherwise use format detected by extension
+  const ContentType = (headerContentType && headerContentType !== 'binary/octet-stream' && headerContentType !== 'application/x-www-form-urlencoded') ? headerContentType : contentType;
   const ETag = headers['etag'];
   const LastModified = headers['last-modified'];
   // use request cache-control if avail, otherwise fallback storage setting
