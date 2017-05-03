@@ -8,7 +8,7 @@ export default function getClient(config, storageId) {
   const absPath = path.isAbsolute(storeConfig.driver) ? storeConfig.driver // already absolute path
     : path.resolve(process.cwd(), 'node_modules/' + storeConfig.driver) // typical 
   ;
-  const mod = mod = require(absPath);
+  const mod = require(absPath);
   const Driver = mod.default || mod; // support ES Modules & CommonJS
   const instance = new Driver(storeConfig.options || {});
   instance.id = storageId;
