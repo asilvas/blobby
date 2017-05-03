@@ -50,7 +50,7 @@ blobby help
 
 A number of configuration formats are supported, including
 JSON, [JSON5](http://json5.org/), CommonJS, and
-[Secure Configurations](#secure-sonfiguration).
+[Secure Configurations](#secure-configuration).
 
 | Option | Type | Default | Desc |
 | --- | --- | --- | --- |
