@@ -80,7 +80,7 @@ blobby server --config-dir lib/config
 | http | HttpBindings | `{ "default": { "port": 80 } }` | Collection (hash for ease of merging) of HTTP bindings |
 | http.{id} | HttpBinding | (required) | HTTP Binding Object |
 | http.{id}.port | number | `80` | Port to bind to |
-| http.{id}.host | string | `"localhost"` | Host to bind to |
+| http.{id}.host | string | undefined | Host to bind to, or nothing to use Node.js default |
 | http.{id}.ssl | Object | (required if enabling SSL) | See [Node.js TLS Options](https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options) | http.{id}.ssl.pfx | Buffer or string | none | If string will attempt to load pfx from disk |
 | http.{id}.ssl.key | Buffer or string | none | If string will attempt to load private key from disk |
 | http.{id}.ssl.cert | Buffer or string | none | If string will attempt to load certificate from disk |

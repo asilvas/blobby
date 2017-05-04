@@ -22,7 +22,7 @@ export const handler = argv => {
       const httpConfig = config.http[k];
       return {
         port: httpConfig.port || 80,
-        host: httpConfig.host || 'localhost',
+        host: httpConfig.host,
         backlog: httpConfig.backlog || 511,
         ssl: httpConfig.ssl
       };
