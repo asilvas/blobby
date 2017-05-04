@@ -9,7 +9,7 @@ as well as enables fast local reads in multi datacenter replication setups.
 Additionally **blobby** provides a simple CLI for analyzing your complex data
 architectures by way of storage comparisons, repairs, stats, and more.
 
-![NPM](https://raw.githubusercontent.com/asilvas/blobby/master/docs/repair-env.jpg)
+![NPM](https://raw.githubusercontent.com/asilvas/blobby/master/docs/architecture.jpg)
 
 
 ## Installation
@@ -278,6 +278,8 @@ Available modes:
 For repairing the difference between storage bindings
 and/or environments. This is a two-way repair. Use `copy`
 instead if you only want to do a one-way repair.
+
+![NPM](https://raw.githubusercontent.com/asilvas/blobby/master/docs/repair-env.jpg)
 
 ```
 blobby repair <storage..>
