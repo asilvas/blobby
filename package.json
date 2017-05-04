@@ -1,6 +1,6 @@
 {
   "name": "blobby",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "To be announced",
   "main": "index.js",
   "scripts": {
@@ -45,6 +45,7 @@
     "rimraf": "^2.6.1"
   },
   "files": [
+    "bin",
     "lib",
     "src",
     "index.js",
