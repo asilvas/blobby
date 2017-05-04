@@ -97,7 +97,8 @@ blobby server --config-dir lib/config
 
 ### Storage Drivers
 
-* [blobby-s3](https://github.com/asilvas/blobby-s3) - An S3 client for Blobby, powered by Knox.
+* [blobby-s3](https://github.com/asilvas/blobby-s3) - An S3 storage client for Blobby, powered by Knox.
+* [blobby-fs](https://github.com/asilvas/blobby-fs) - A File System storage client for Blobby.
 
 
 ## Secure Configuration
