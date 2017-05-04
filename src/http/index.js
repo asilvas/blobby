@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import mimeTypes from 'mime-types';
 import path from 'path';
 import headFile from './head-file';
+import getStatic from './get-static';
 import getFile from './get-file';
 import getFiles from './get-files';
 import putFile from './put-file';
@@ -13,6 +14,9 @@ import getAuthHandler from './get-auth';
 export default (argv, config) => {
   return (req, res) => {
     const urlInfo = url.parse(req.url, true, true);
+    const contentType = mimeTypes.lookup(path.extname(urlInfo.pathname)) || 'binary/octet-stream';
+    if (getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
+
     const pathParts = urlInfo.pathname.split('/');
     const storageId = pathParts[1];
     let storage;
@@ -27,7 +31,6 @@ export default (argv, config) => {
     }
 
     const fileKey = pathParts.slice(2).join('/');
-    const contentType = mimeTypes.lookup(path.extname(fileKey)) || 'binary/octet-stream';
     const opts = { argv, config, storage, fileKey, urlInfo, req, res, contentType };
     opts.auth = getAuthHandler(opts);
 

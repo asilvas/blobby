@@ -1,5 +1,6 @@
 import yargs from 'yargs';
 import path from 'path';
+import pkg from '../package.json';
 
 yargs
   .commandDir(path.resolve(__dirname, '..', 'lib', 'cmds'))
@@ -57,5 +58,6 @@ yargs
   })
   .demandCommand()
   .help()
+  .epilogue(`Blobby v${pkg.version}`)
   .argv
 ;
