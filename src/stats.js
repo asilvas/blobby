@@ -42,9 +42,7 @@ export default class Stats {
         value: 'Config.Storage',
         headerColor: 'white',
         color: 'cyan',
-        align: 'left',
-        paddingLeft: 3,
-        width: 30
+        align: 'center'
       }
     ];
     const configIds = Object.keys(this.configs).map(k => this.configs[k].id);
@@ -59,8 +57,7 @@ export default class Stats {
           value: `${pairId} (dest)`,
           headerColor: 'cyan',
           color: 'white',
-          width: 28,
-          padding: 1,
+          align: 'center',
           formatter: stats => {
             const info = stats && stats.info;
             const strs = [];
@@ -118,37 +115,33 @@ export default class Stats {
     const table = Table(header, rows, footer, {
       borderStyle : 1,
       borderColor : 'grey',
-      paddingBottom : 0,
+      paddingLeft: 1,
+      paddingRight: 1,
       headerAlign : 'center',
+      width: 200, // use max width, whatever is allowed by terminal
       align : 'center',
       color : 'white'
     });
 
     let output = table.render();
     if (errors.length > 0) {
-      output += '\n\nTop Errors:\n';
-
       const errTable = Table([ // header
           {
             value: 'Src -> Dest',
             headerColor: 'cyan',
             color: 'yellow',
-            align: 'left',
-            paddingLeft: 2,
-            width: 25
+            align: 'center'
           },
           {
-            value: 'Error',
+            value: 'Top Errors',
             headerColor: 'cyan',
             color: 'red',
-            align: 'center',
-            padding: 1,
-            width: 120
+            align: 'center'
           }
         ],
         errors.slice(0, 5).map(e => { // rows
           const split = e.pairId.split('.');
-          return [`${split[0]}.${split[1]} -> ${split[2]}.${split[3]}`, e.err.stack || e.err];
+          return [`${split[0]}.${split[1]} -> ${split[2]}.${split[3]}`, e.err];
         }),
         [], // footer
         { // options
@@ -156,7 +149,8 @@ export default class Stats {
           borderColor: 'grey',
           paddingBottom: 0,
           headerAlign: 'center',
-          align: 'left',
+          width: 200, // use max width, whatever is allowed by terminal
+          align: 'center',
           color: 'red'
         }
       );
@@ -164,7 +158,7 @@ export default class Stats {
       output += errTable.render();
     }
 
-    terminal.reset(); // required to clear screen in some terminals due to lack of cursor support
+    terminal.clear(); // required to clear screen in some terminals due to lack of cursor support
     //console.log('');
     /*if (this.hasCursor) {
       terminal.restoreCursor();
