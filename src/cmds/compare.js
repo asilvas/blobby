@@ -44,7 +44,7 @@ export const handler = argv => {
       configStorages.forEach(dst => {
         if (src.id === dst.id) return; // do not create a task to compare itself, ignore
 
-        compareTasks.push(getCompareTask(argv.mode, src, dst, stats));
+        compareTasks.push(getCompareTask(argv, src, dst, stats));
       });
     });
 
@@ -68,11 +68,11 @@ export const handler = argv => {
   });
 };
 
-function getCompareTask(mode, src, dst, stats) {
+function getCompareTask(argv, src, dst, stats) {
   const statInfo = stats.getStats(src.config, src.storage, dst.config, dst.storage);
   return cb => {
     statInfo.running();
-    compare(mode, src.config, src.storage, dst.config, dst.storage, statInfo, (err) => {
+    compare(argv, src.config, src.storage, dst.config, dst.storage, statInfo, (err) => {
       statInfo.complete();
 
       if (err) {
@@ -84,7 +84,8 @@ function getCompareTask(mode, src, dst, stats) {
   };
 }
 
-function compare(mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, cb) {
+function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, cb) {
+  const { mode, dir } = argv;
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
 
@@ -99,11 +100,11 @@ function compare(mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
         return void cb();
       }
 
-      srcStorage.list('', { deepQuery: true, maxKeys: 5000, lastKey }, compareFiles);
+      srcStorage.list(dir || '', { deepQuery: !dir, maxKeys: 5000, lastKey }, compareFiles);
     });
   };
 
-  srcStorage.list('', { deepQuery: true, maxKeys: 5000 }, compareFiles);
+  srcStorage.list(dir || '', { deepQuery: !dir, maxKeys: 5000 }, compareFiles);
 }
 
 function getCompareFileTask(file, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
