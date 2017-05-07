@@ -133,7 +133,7 @@ export default class Stats {
             align: 'center'
           },
           {
-            value: 'Top Errors',
+            value: `Top Errors (of ${errors.length})`,
             headerColor: 'cyan',
             color: 'red',
             align: 'center'
