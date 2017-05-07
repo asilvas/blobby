@@ -50,7 +50,7 @@ export const handler = argv => {
 
     if (compareTasks.length === 0) return void console.error('No repair tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nRepairing...'), 500);
+    const statsTimer = setInterval(() => console.log(stats.toString() + '\nRepairing...'), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -59,7 +59,7 @@ export const handler = argv => {
       console.log(stats.toString());
 
       if (err) {
-        console.error('File repair has failed, aborting...', err);
+        console.error('File repair has failed, aborting...', err.stack || err);
       } else {
         console.log('Repair complete');
       }
@@ -75,7 +75,12 @@ function getCompareTask(mode, src, dst, stats) {
     statInfo.running();
     compare(mode, src.config, src.storage, dst.config, dst.storage, statInfo, (err) => {
       statInfo.complete();
-      cb(err);
+
+      if (err) {
+        console.error('Repair failure:', err.stack || err); // log only, do not abort repair
+      }
+
+      cb();
     });
   };
 }

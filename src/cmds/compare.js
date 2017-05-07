@@ -50,7 +50,7 @@ export const handler = argv => {
 
     if (compareTasks.length === 0) return void console.error('No comparison tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nComparing...'), 500);
+    const statsTimer = setInterval(() => console.log(stats.toString() + '\nComparing...'), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -74,7 +74,12 @@ function getCompareTask(mode, src, dst, stats) {
     statInfo.running();
     compare(mode, src.config, src.storage, dst.config, dst.storage, statInfo, (err) => {
       statInfo.complete();
-      cb(err);
+
+      if (err) {
+        console.error('Compare failure:', err.stack || err); // log only, do not abort repair
+      }
+
+      cb();
     });
   };
 }

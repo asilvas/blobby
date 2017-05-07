@@ -44,7 +44,7 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nComputing stats...'), 500);
+    const statsTimer = setInterval(() => console.log(stats.toString() + '\nComputing stats...'), 1000);
     statsTimer.unref();
 
     // process all comparisons
