@@ -51,6 +51,11 @@ yargs
     default: 'headers',
     choices: ['fast', 'headers', 'deep']
   })
+  .option('concurrency', {
+    describe: 'Number of concurrent I/O operations allowed by operations that support it',
+    default: 20,
+    type: 'number'
+  })
   .option('no-color', {
     describe: 'If color isn\'t desired or support, this flag can be set to turn off all color',
     default: false,

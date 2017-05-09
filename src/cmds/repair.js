@@ -94,7 +94,7 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
       return getCompareFileTask(f, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
     });
 
-    async.parallelLimit(compareFileTasks, 10, (err) => {
+    async.parallelLimit(compareFileTasks, argv.concurrency || 20, (err) => {
       if (err) return void cb(err);
 
       if (!lastKey) { // we're done, no more files to compare
