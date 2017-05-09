@@ -9,6 +9,7 @@ import getFile from './get-file';
 import getFiles from './get-files';
 import putFile from './put-file';
 import deleteFile from './delete-file';
+import deleteFiles from './delete-files';
 import getAuthHandler from './get-auth';
 
 export default (argv, config) => {
@@ -46,7 +47,8 @@ export default (argv, config) => {
         putFile(opts);
         break;
       case 'DELETE':
-        deleteFile(opts);
+        if (pathParts[pathParts.length - 1] === '') deleteFiles(opts); // if path ends in `/` it's a directory request
+        else deleteFile(opts);
         break;
       default:
         console.error(chalk.red(`Invalid req.method ${req.method}`));
