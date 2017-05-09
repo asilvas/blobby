@@ -16,8 +16,7 @@ export default (argv, config) => {
   return (req, res) => {
     const urlInfo = url.parse(req.url, true, true);
     const contentType = mimeTypes.lookup(path.extname(urlInfo.pathname)) || 'binary/octet-stream';
-    if (getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
-
+    if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
     const pathParts = urlInfo.pathname.split('/');
     const storageId = pathParts[1];
     let storage;
@@ -34,7 +33,6 @@ export default (argv, config) => {
     const fileKey = pathParts.slice(2).join('/');
     const opts = { argv, config, storage, fileKey, urlInfo, req, res, contentType };
     opts.auth = getAuthHandler(opts);
-
     switch (req.method) {
       case 'HEAD':
         headFile(opts);
