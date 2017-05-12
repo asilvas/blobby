@@ -332,3 +332,19 @@ Example of initializing a single storage:
 ```
 blobby initialize new
 ```
+
+
+
+## Shard
+
+Useful for identifying the location of a given directory for storage
+drivers that support sharding.
+
+```
+blobby shard <storage> <dir>
+```
+
+Example:
+```
+blobby shard new 'some/path'
+```
