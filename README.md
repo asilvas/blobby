@@ -89,7 +89,7 @@ blobby server --config-dir lib/config
 | storage.{id}.driver | string | (required) | Module name/path to use as storage client |
 | storage.{id}.maxUploadSize | number | none | Size in bytes allowed by uploads |
 | storage.{id}.cacheControl | string | `"public,max-age=31536000"` | Default cache control headers to apply for GET's and PUT's if file does not provide it |
-| storage.{id}.accessControl | string | `"public-read"` | Default to publically readable |
+| storage.{id}.accessControl | string | `"public-read"` | Default to publically readable. [Full ACL List](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) |
 | storage.{id}.driver | string | (required) | Module name/path to use as storage client |
 | storage.{id}.dirSplit | number | false | (future) If Number, auto-split paths every N characters to make listing of directories much faster |
 | storage.{id}.auth | string | none | Required to support Uploads and Deletes, see [Secure API Operations](#secure-api-operations) |
@@ -273,6 +273,10 @@ Available modes:
   from a little slower, to much slower, depending on `ETag` availability.
   Recommended for mutable storage comparisons where caching headers are not
   available (ex: comparing a file system with S3 or vice versa).
+* `force` - If you want to skip comparison for any reason, this will force the
+  comparison to fail, resulting in update of the destination for all source
+  files. Also has the benefit of being the fastest option since destination does
+  not need queried.
 
 
 ## Repair

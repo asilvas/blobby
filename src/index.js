@@ -49,7 +49,7 @@ yargs
   .option('mode', {
     describe: 'Select level of comparison required to verify storage integrity',
     default: 'headers',
-    choices: ['fast', 'headers', 'deep']
+    choices: ['fast', 'headers', 'deep', 'force']
   })
   .option('concurrency', {
     describe: 'Number of concurrent I/O operations allowed by operations that support it',
