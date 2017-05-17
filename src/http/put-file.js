@@ -19,7 +19,8 @@ export default opts => {
   const LastModified = headers['last-modified'];
   // use request cache-control if avail, otherwise fallback storage setting
   const CacheControl = headers['cache-control'] || storage.config.cacheControl;
-  const fileInfo = { ContentType, CacheControl }; // storage file headers
+  const AccessControl = headers['x-amz-acl'] || storage.config.accessControl || 'public-read';
+  const fileInfo = { ContentType, CacheControl, AccessControl }; // storage file headers
   if (ETag) fileInfo.ETag = ETag;
   if (LastModified) fileInfo.LastModified = LastModified;
 
