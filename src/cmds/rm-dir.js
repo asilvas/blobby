@@ -4,20 +4,16 @@ import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
 
-export const command = 'acl <dir> <acl> <deepQuery> <storage..>';
-export const desc = 'Set ACL\'s for a given directory for the given storage bindings and/or environments';
+export const command = 'rmdir <dir> <deepQuery> <storage..>';
+export const desc = 'Delete files for the given directory and storage bindings and/or environments';
 export const builder = {
   dir: {
-    describe: 'Directory to apply ACL\'s to',
+    describe: 'Directory to search',
     type: 'string'
   },
   deepQuery: {
     describe: 'Span all sub "directories" (true) or just the requested directory (false).',
     type: 'boolean'
-  },
-  acl: {
-    describe: 'ACL appropriate for the storage interface. S3 includes `private`, `public-read`, and many more.',
-    type: 'string'
   },
   storage: {
     describe: 'Provide two or more storage bindings you wish to synchronize',
@@ -56,7 +52,7 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nApplying ACL\'s...'), 1000);
+    const statsTimer = setInterval(() => console.log(stats.toString() + '\nRemoving files...'), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -65,9 +61,9 @@ export const handler = argv => {
       console.log(stats.toString());
 
       if (err) {
-        console.error('ACL\'s has failed, aborting...', err);
+        console.error('Removing files has failed, aborting...', err);
       } else {
-        console.log('ACL\'s complete');
+        console.log('File deletion complete');
       }
     });
     
@@ -89,7 +85,7 @@ function task(argv, srcConfig, srcStorage, statInfo, cb) {
   const nextFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
 
-    const fileTasks = files.map(f => getFileTask(f, argv.acl, srcStorage, statInfo));
+    const fileTasks = files.map(f => getFileTask(f, srcStorage, statInfo));
 
     async.parallelLimit(fileTasks, argv.concurrency || 20, (err) => {
       if (err) return void cb(err);
@@ -105,13 +101,11 @@ function task(argv, srcConfig, srcStorage, statInfo, cb) {
   srcStorage.list(argv.dir, { deepQuery: argv.deepQuery, maxKeys: 5000 }, nextFiles);
 }
 
-function getFileTask(file, acl, storage, statInfo) {
+function getFileTask(file, storage, statInfo) {
   statInfo.diff(file.Size);
 
   return cb => {
-    if (!storage.setACL) return void cb(new Error(`Storage ${storage.id} does not support required 'setACL'`));
-
-    storage.setACL(file.Key, acl, err => {
+    storage.remove(file.Key, err => {
       if (err) {
         statInfo.error(err);
         return void cb();
