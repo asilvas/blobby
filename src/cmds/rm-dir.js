@@ -88,7 +88,10 @@ function task(argv, srcConfig, srcStorage, statInfo, cb) {
     const fileTasks = files.map(f => getFileTask(f, srcStorage, statInfo));
 
     async.parallelLimit(fileTasks, argv.concurrency || 20, (err) => {
-      if (err) return void cb(err);
+      if (err) {
+        statInfo.error(err);
+        return void cb();
+      }
 
       if (!lastKey) { // we're done, no more files
         return void cb();
