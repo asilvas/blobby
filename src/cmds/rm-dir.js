@@ -83,7 +83,10 @@ function getTask(argv, src, stats) {
 
 function task(argv, srcConfig, srcStorage, statInfo, cb) {
   const nextFiles = (err, files, dirs, lastKey) => {
-    if (err) return void cb(err);
+    if (err) {
+      statInfo.error(err);
+      return void cb();
+    }
 
     const fileTasks = files.map(f => getFileTask(f, srcStorage, statInfo));
 
