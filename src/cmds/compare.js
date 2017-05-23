@@ -13,6 +13,8 @@ export const builder = {
   }
 };
 
+let gLastKey = '';
+
 export const handler = argv => {
   const stats = new Stats();
 
@@ -50,7 +52,7 @@ export const handler = argv => {
 
     if (compareTasks.length === 0) return void console.error('No comparison tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nComparing...'), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nComparing...`), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -88,7 +90,7 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
   const { mode, dir } = argv;
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
-
+    gLastKey = lastKey;
     const compareFileTasks = files.map(f => {
       return getCompareFileTask(f, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
     });

@@ -4,7 +4,7 @@ import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
 
-export const command = 'acl <dir> <acl> <deepQuery> <storage..>';
+export const command = 'acl <dir> <deepQuery> <storage..>';
 export const desc = 'Set ACL\'s for a given directory for the given storage bindings and/or environments';
 export const builder = {
   dir: {
@@ -15,15 +15,13 @@ export const builder = {
     describe: 'Span all sub "directories" (true) or just the requested directory (false).',
     type: 'boolean'
   },
-  acl: {
-    describe: 'ACL appropriate for the storage interface. S3 includes `private`, `public-read`, and many more.',
-    type: 'string'
-  },
   storage: {
     describe: 'Provide two or more storage bindings you wish to synchronize',
     type: 'array'
   }
 };
+
+let gLastKey = '';
 
 export const handler = argv => {
   const stats = new Stats();
@@ -56,7 +54,7 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nApplying ACL\'s...'), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nApplying ACL\'s...`), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -88,7 +86,7 @@ function getTask(argv, src, stats) {
 function task(argv, srcConfig, srcStorage, statInfo, cb) {
   const nextFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
-
+    gLastKey = lastKey;
     const fileTasks = files.map(f => getFileTask(f, argv.acl, srcStorage, statInfo));
 
     async.parallelLimit(fileTasks, argv.concurrency || 20, (err) => {

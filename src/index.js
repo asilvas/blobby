@@ -51,6 +51,11 @@ yargs
     default: 'headers',
     choices: ['fast', 'headers', 'deep', 'force']
   })
+  .option('acl', {
+    describe: 'ACL\'s to apply when writing objects',
+    default: 'public-read',
+    type: 'string'
+  })
   .option('concurrency', {
     describe: 'Number of concurrent I/O operations allowed by operations that support it',
     default: 20,

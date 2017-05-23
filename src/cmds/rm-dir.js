@@ -21,6 +21,8 @@ export const builder = {
   }
 };
 
+let gLastKey = '';
+
 export const handler = argv => {
   const stats = new Stats();
 
@@ -52,7 +54,7 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nRemoving files...'), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nRemoving files...`), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -87,7 +89,7 @@ function task(argv, srcConfig, srcStorage, statInfo, cb) {
       statInfo.error(err);
       return void cb();
     }
-
+    gLastKey = lastKey;
     const fileTasks = files.map(f => getFileTask(f, srcStorage, statInfo));
 
     async.parallelLimit(fileTasks, argv.concurrency || 20, (err) => {

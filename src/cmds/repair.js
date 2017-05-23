@@ -13,6 +13,8 @@ export const builder = {
   }
 };
 
+let gLastKey = '';
+
 export const handler = argv => {
   const stats = new Stats();
 
@@ -50,7 +52,7 @@ export const handler = argv => {
 
     if (compareTasks.length === 0) return void console.error('No repair tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(stats.toString() + '\nRepairing...'), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nRepairing...`), 1000);
     statsTimer.unref();
 
     // process all comparisons
@@ -86,12 +88,12 @@ function getCompareTask(argv, src, dst, stats) {
 }
 
 function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, cb) {
-  const { mode, dir } = argv;
+  const { dir } = argv;
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
-
+    gLastKey = lastKey;
     const compareFileTasks = files.map(f => {
-      return getCompareFileTask(f, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
+      return getCompareFileTask(f, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
     });
 
     async.parallelLimit(compareFileTasks, argv.concurrency || 20, (err) => {
@@ -108,7 +110,8 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
   srcStorage.list(dir || '', { deepQuery: !dir, maxKeys: 5000 }, compareFiles);
 }
 
-function getCompareFileTask(file, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
+function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
+  const { mode, acl } = argv;
   return cb => {
     getComparer(file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
       if (err || isMatch === false) {
@@ -129,6 +132,7 @@ function getCompareFileTask(file, mode, srcConfig, srcStorage, dstConfig, dstSto
           return void cb();
         }
 
+        info.AccessControl = info.AccessControl || acl; // apply default acl's if not available from source
         dstStorage.store(file.Key, { buffer, headers: info }, (err) => {
           if (err) {
             // if we fail to repair, now record error
