@@ -52,7 +52,7 @@ export const handler = argv => {
 
     if (compareTasks.length === 0) return void console.error('No repair tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nRepairing...`), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nRepairing...`), 5000);
     statsTimer.unref();
 
     // process all comparisons
@@ -115,10 +115,10 @@ function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstSto
   return cb => {
     getComparer(file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
       if (err || isMatch === false) {
-        statInfo.diff(file.Size);
+        statInfo.diff(file);
       } else {
         // is match
-        statInfo.match(file.Size);
+        statInfo.match(file);
 
         cb();
         return;

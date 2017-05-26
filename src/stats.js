@@ -72,8 +72,8 @@ export default class Stats {
               else if (info.srcFiles === info.matches) {
                 return active.bgGreen.black(`All ${info.srcFiles} match (${bytes(info.matchSize)})`);
               }
-              else if (info.repairs > 0) {
-                return active.bgYellow.red(`${info.diffs} diffs (${bytes(info.diffSize)}), ${info.repairs} repairs, ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
+              else if (info.repairs.length > 0) {
+                return active.bgYellow.red(`${info.diffs} diffs (${bytes(info.diffSize)}), ${info.repairs.length} repairs, ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
               }
               else {
                 return active.bgRed.yellow(`${info.diffs} diffs (${bytes(info.diffSize)}), ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
@@ -88,6 +88,7 @@ export default class Stats {
       });
     });
     let errors = [];
+    let repairs = [];
     const $this = this;
     const rows = configStoragePairs.map(xPair => {
       const row = [`${xPair} (src)`] // y header
@@ -99,6 +100,9 @@ export default class Stats {
           if (statInfo) {
             errors = errors.concat(statInfo.info.errors.map(err => {
               return { pairId, err };
+            }));
+            repairs = repairs.concat(statInfo.info.repairs.map(file => {
+              return { pairId, file };
             }));
           }
 
@@ -133,13 +137,13 @@ export default class Stats {
             align: 'center'
           },
           {
-            value: `Top Errors (of ${errors.length})`,
+            value: `Last Errors (of ${errors.length})`,
             headerColor: 'cyan',
             color: 'red',
             align: 'center'
           }
         ],
-        errors.slice(0, 5).map(e => { // rows
+        errors.slice(-10).map(e => { // rows
           const split = e.pairId.split('.');
           return [`${split[0]}.${split[1]} -> ${split[2]}.${split[3]}`, e.err];
         }),
@@ -156,6 +160,40 @@ export default class Stats {
       );
 
       output += errTable.render();
+    }
+
+    if (repairs.length > 0) {
+      const repairsTable = Table([ // header
+          {
+            value: 'Src -> Dest',
+            headerColor: 'cyan',
+            color: 'yellow',
+            align: 'center'
+          },
+          {
+            value: `Last Repairs (of ${repairs.length})`,
+            headerColor: 'cyan',
+            color: 'red',
+            align: 'center'
+          }
+        ],
+        repairs.slice(-10).map(r => { // rows
+          const split = r.pairId.split('.');
+          return [`${split[0]}.${split[1]} -> ${split[2]}.${split[3]}`, r.file.Key];
+        }),
+        [], // footer
+        { // options
+          borderStyle: 1,
+          borderColor: 'grey',
+          paddingBottom: 0,
+          headerAlign: 'center',
+          width: 200, // use max width, whatever is allowed by terminal
+          align: 'center',
+          color: 'red'
+        }
+      );
+
+      output += repairsTable.render();
     }
 
     terminal.clear(); // required to clear screen in some terminals due to lack of cursor support
@@ -184,21 +222,23 @@ class StatInfo {
       matchSize: 0,
       diffs: 0,
       diffSize: 0,
-      repairs: 0,
+      repairs: [],
       errors: []
     };
   }
 
-  match(size) {
+  match(file) {
+    this.lastFile = file;
     this.info.srcFiles++;
     this.info.matches++;
-    if (size) this.info.matchSize += size;
+    if (file && file.Size) this.info.matchSize += file.Size;
   }
 
-  diff(size) {
+  diff(file) {
+    this.lastFile = file;
     this.info.srcFiles++;
     this.info.diffs++;
-    if (size) this.info.diffSize += size;
+    if (file && file.Size) this.info.diffSize += file.Size;
   }
 
   error(err) {
@@ -206,7 +246,9 @@ class StatInfo {
   }
 
   repair() {
-    this.info.repairs++;
+    if (this.lastFile) {
+      this.info.repairs.push(this.lastFile);
+    }
   }
 
   running() {

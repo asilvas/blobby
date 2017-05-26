@@ -46,7 +46,7 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nComputing stats...`), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nComputing stats...`), 5000);
     statsTimer.unref();
 
     // process all comparisons
@@ -80,7 +80,7 @@ function task(srcConfig, srcStorage, statInfo, cb) {
     if (err) return void cb(err);
     gLastKey = lastKey;
     files.forEach(f => {
-      statInfo.match(f.Size);
+      statInfo.match(f);
     });
 
     if (!lastKey) { // we're done, no more files to compare

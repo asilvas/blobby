@@ -54,7 +54,7 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nApplying ACL\'s...`), 1000);
+    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nApplying ACL\'s...`), 5000);
     statsTimer.unref();
 
     // process all comparisons
@@ -104,7 +104,7 @@ function task(argv, srcConfig, srcStorage, statInfo, cb) {
 }
 
 function getFileTask(file, acl, storage, statInfo) {
-  statInfo.diff(file.Size);
+  statInfo.diff(file);
 
   return cb => {
     if (!storage.setACL) return void cb(new Error(`Storage ${storage.id} does not support required 'setACL'`));
