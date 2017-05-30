@@ -61,6 +61,11 @@ yargs
     default: 20,
     type: 'number'
   })
+  .option('recursive', {
+    describe: 'Enable deep query (recursive subdirectories) for operations that support it',
+    default: true,
+    type: 'boolean'
+  })
   .option('no-color', {
     describe: 'If color isn\'t desired or support, this flag can be set to turn off all color',
     default: false,

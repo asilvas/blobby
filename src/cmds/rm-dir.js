@@ -4,16 +4,12 @@ import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
 
-export const command = 'rmdir <dir> <deepQuery> <storage..>';
+export const command = 'rmdir <dir> <storage..>';
 export const desc = 'Delete files for the given directory and storage bindings and/or environments';
 export const builder = {
   dir: {
     describe: 'Directory to search',
     type: 'string'
-  },
-  deepQuery: {
-    describe: 'Span all sub "directories" (true) or just the requested directory (false).',
-    type: 'boolean'
   },
   storage: {
     describe: 'Provide two or more storage bindings you wish to synchronize',
@@ -102,11 +98,11 @@ function task(argv, srcConfig, srcStorage, statInfo, cb) {
         return void cb();
       }
 
-      srcStorage.list(argv.dir, { deepQuery: argv.deepQuery, maxKeys: 5000, lastKey }, nextFiles);
+      srcStorage.list(argv.dir, { deepQuery: argv.recursive, maxKeys: 5000, lastKey }, nextFiles);
     });
   };
 
-  srcStorage.list(argv.dir, { deepQuery: argv.deepQuery, maxKeys: 5000 }, nextFiles);
+  srcStorage.list(argv.dir, { deepQuery: argv.recursive, maxKeys: 5000 }, nextFiles);
 }
 
 function getFileTask(file, storage, statInfo) {

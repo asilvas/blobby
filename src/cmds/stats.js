@@ -41,7 +41,7 @@ export const handler = argv => {
     configStorages = Object.keys(configStorages).map(id => configStorages[id]);
 
     configStorages.forEach(src => {
-      tasks.push(getTask(src, stats));
+      tasks.push(getTask(argv, src, stats));
     });
 
     if (tasks.length === 0) return void console.error('No tasks detected, see help');
@@ -64,18 +64,18 @@ export const handler = argv => {
   });
 };
 
-function getTask(src, stats) {
+function getTask(argv, src, stats) {
   const statInfo = stats.getStats(src.config, src.storage);
   return cb => {
     statInfo.running();
-    task(src.config, src.storage, statInfo, (err) => {
+    task(argv, src.config, src.storage, statInfo, (err) => {
       statInfo.complete();
       cb(err);
     });
   };
 }
 
-function task(srcConfig, srcStorage, statInfo, cb) {
+function task(argv, srcConfig, srcStorage, statInfo, cb) {
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
     gLastKey = lastKey;
@@ -87,8 +87,8 @@ function task(srcConfig, srcStorage, statInfo, cb) {
       return void cb();
     }
 
-    srcStorage.list('', { deepQuery: true, maxKeys: 5000, lastKey }, compareFiles);
+    srcStorage.list('', { deepQuery: argv.recursive, maxKeys: 5000, lastKey }, compareFiles);
   };
 
-  srcStorage.list('', { deepQuery: true, maxKeys: 5000 }, compareFiles);
+  srcStorage.list('', { deepQuery: argv.recursive, maxKeys: 5000 }, compareFiles);
 }

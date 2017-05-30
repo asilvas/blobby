@@ -103,11 +103,11 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
         return void cb();
       }
 
-      srcStorage.list(dir || '', { deepQuery: !dir, maxKeys: 5000, lastKey }, compareFiles);
+      srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey }, compareFiles);
     });
   };
 
-  srcStorage.list(dir || '', { deepQuery: !dir, maxKeys: 5000 }, compareFiles);
+  srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000 }, compareFiles);
 }
 
 function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
