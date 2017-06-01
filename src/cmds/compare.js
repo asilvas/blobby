@@ -3,6 +3,7 @@ import getStorage from '../storage';
 import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
+import shouldExecuteTask from './util/should-execute-task';
 
 export const command = 'compare <storage..>';
 export const desc = 'Compare files between storage bindings and/or environments';
@@ -41,10 +42,8 @@ export const handler = argv => {
     configStorages = Object.keys(configStorages).map(id => configStorages[id]);
 
     configStorages.forEach(src => {
-      if (argv.oneWay === true && src.storage.id !== argv.storage[0]) return; // do not create tasks for more than one source storage
-
       configStorages.forEach(dst => {
-        if (src.id === dst.id) return; // do not create a task to compare itself, ignore
+        if (!shouldExecuteTask(argv, src, dst)) return; // exclude task
 
         compareTasks.push(getCompareTask(argv, src, dst, stats));
       });
