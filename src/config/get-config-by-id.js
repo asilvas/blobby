@@ -4,6 +4,7 @@ import fs from 'fs';
 import json5 from 'json5';
 import merge from 'merge';
 import async from 'async';
+import defaultConfig from './default-config';
 
 const gConfigs = {};
 
@@ -45,7 +46,7 @@ export default (configName, argv, cb) => {
   }, (err, results) => {
     if (err) return void cb(err);
 
-    const finalConfig = merge.recursive({}, results.baseConfig, results.envConfig, results.secureConfig);
+    const finalConfig = merge.recursive({}, defaultConfig, results.baseConfig, results.envConfig, results.secureConfig);
 
     cb(null, finalConfig);
   });

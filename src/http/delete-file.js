@@ -1,9 +1,10 @@
 import async from 'async';
 import getStorage from '../storage';
 import getConfig from '../config/get-config-by-id';
+import retry from '../util/retry';
 
 export default opts => {
-  const { auth, storage, fileKey, req, res, contentType, urlInfo } = opts;
+  const { auth, storage, fileKey, req, res, contentType, urlInfo, config } = opts;
   const { headers } = req;
 
   if (!auth) { // auth required for delete's
@@ -29,7 +30,7 @@ export default opts => {
       });
     },
     writeMaster: ['authorize', (results, cb) => {
-      storage.remove(fileKey, cb);
+      retry(storage.remove.bind(storage, fileKey), config.retry, cb);
     }],
     writeReplicas: ['authorize', (results, cb) => { // write in parallel to master
       if (!Array.isArray(storage.config.replicas) || storage.config.replicas.length === 0) return void cb(); // no replicas to write to
@@ -81,6 +82,6 @@ function writeToReplica(replica, fileKey, opts, cb) {
         cb(ex);
       }
     }],
-    write: ['storage', (results, cb) => results.storage.remove(fileKey, cb)]
+    write: ['storage', (results, cb) => retry(results.storage.remove.bind(results.storage, fileKey), results.config.retry, cb)]
   }, cb);
 }

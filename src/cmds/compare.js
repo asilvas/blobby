@@ -4,6 +4,7 @@ import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
 import shouldExecuteTask from './util/should-execute-task';
+import getConfigStoragePairs from './util/get-config-storage-pairs';
 
 export const command = 'compare <storage..>';
 export const desc = 'Compare files between storage bindings and/or environments';
@@ -23,24 +24,7 @@ export const handler = argv => {
   getConfigs(argv, (err, configs) => {
     if (err) return void console.error(err);
 
-    let configStorages = {};
-    // compare every config+storage combo against one another
-    configs.forEach(config => {
-      argv.storage.forEach(storage => {
-        const configStorageId = `${config.id}.${storage}`;
-        if (!configStorages[configStorageId]) {
-          configStorages[configStorageId] = {
-            id: configStorageId,
-            config: config,
-            storage: getStorage(config, storage)
-          };
-        }
-      });
-    });
-
-    // turn hash into array
-    configStorages = Object.keys(configStorages).map(id => configStorages[id]);
-
+    const configStorages = getConfigStoragePairs(argv, configs);
     configStorages.forEach(src => {
       configStorages.forEach(dst => {
         if (!shouldExecuteTask(argv, src, dst)) return; // exclude task
@@ -91,7 +75,7 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
     if (err) return void cb(err);
     gLastKey = lastKey;
     const compareFileTasks = files.map(f => {
-      return getCompareFileTask(f, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
+      return getCompareFileTask(f, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
     });
 
     async.parallelLimit(compareFileTasks, argv.concurrency || 20, (err) => {
@@ -108,9 +92,10 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
   srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000 }, compareFiles);
 }
 
-function getCompareFileTask(file, mode, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
+function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
+  const { mode } = argv;
   return cb => {
-    getComparer(file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
+    getComparer(argv, file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
       if (err || isMatch === false) {
         // errors are implied to be "not found", just track as difference
         statInfo.diff(file);

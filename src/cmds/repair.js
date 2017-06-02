@@ -4,6 +4,8 @@ import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
 import shouldExecuteTask from './util/should-execute-task';
+import getConfigStoragePairs from './util/get-config-storage-pairs';
+import retry from '../util/retry';
 
 export const command = 'repair <storage..>';
 export const desc = 'Repair files between storage bindings and/or environments';
@@ -23,24 +25,7 @@ export const handler = argv => {
   getConfigs(argv, (err, configs) => {
     if (err) return void console.error(err);
 
-    let configStorages = {};
-    // compare every config+storage combo against one another
-    configs.forEach(config => {
-      argv.storage.forEach(storage => {
-        const configStorageId = `${config.id}.${storage}`;
-        if (!configStorages[configStorageId]) {
-          configStorages[configStorageId] = {
-            id: configStorageId,
-            config: config,
-            storage: getStorage(config, storage)
-          };
-        }
-      });
-    });
-
-    // turn hash into array
-    configStorages = Object.keys(configStorages).map(id => configStorages[id]);
-
+    const configStorages = getConfigStoragePairs(argv, configs);
     configStorages.forEach(src => {
       configStorages.forEach(dst => {
         if (!shouldExecuteTask(argv, src, dst)) return; // exclude task
@@ -112,7 +97,7 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
 function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
   const { mode, acl } = argv;
   return cb => {
-    getComparer(file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
+    getComparer(argv, file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
       if (err || isMatch === false) {
         statInfo.diff(file);
       } else {
@@ -123,8 +108,10 @@ function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstSto
         return;
       }
 
+      const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
+
       // repair
-      srcStorage.fetch(file.Key, (err, info, buffer) => {
+      retry(srcStorage.fetch.bind(srcStorage, file.Key), retryOpts, (err, info, buffer) => {
         if (err) {
           // if we fail to repair, now record error
           statInfo.error(err);
@@ -132,7 +119,7 @@ function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstSto
         }
 
         info.AccessControl = info.AccessControl || acl; // apply default acl's if not available from source
-        dstStorage.store(file.Key, { buffer, headers: info }, (err) => {
+        retry(dstStorage.store.bind(dstStorage, file.Key, { buffer, headers: info }), retryOpts, (err) => {
           if (err) {
             // if we fail to repair, now record error
             statInfo.error(err);

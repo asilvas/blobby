@@ -1,6 +1,5 @@
 import { getConfigs } from '../config';
 import getStorage from '../storage';
-import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
 

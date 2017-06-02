@@ -1,5 +1,8 @@
-export default (fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
-  dstClient.fetchInfo(fileKey, (err, dstHeaders) => {
+import retry from '../../util/retry';
+
+export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
+  const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
+  retry(dstClient.fetchInfo.bind(dstClient, fileKey), retryOpts, (err, dstHeaders) => {
     if (err) return void cb(err);
     if (!dstHeaders) return void cb(new Error(`File ${fileKey} not found`));
 

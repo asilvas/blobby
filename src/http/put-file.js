@@ -1,9 +1,10 @@
 import async from 'async';
 import getStorage from '../storage';
 import getConfig from '../config/get-config-by-id';
+import retry from '../util/retry';
 
 export default opts => {
-  const { auth, storage, fileKey, req, res, contentType, urlInfo } = opts;
+  const { auth, config, storage, fileKey, req, res, contentType, urlInfo } = opts;
   const { headers } = req;
 
   if (!auth) { // auth required for put's
@@ -71,7 +72,7 @@ export default opts => {
       });      
     },
     writeMaster: ['authorize', 'fileData', (results, cb) => {
-      storage.store(fileKey, { headers: fileInfo, buffer: results.fileData }, {}, cb);
+      retry(storage.store.bind(storage, fileKey, { headers: fileInfo, buffer: results.fileData }, {}), config.retry, cb);
     }],
     writeReplicas: ['authorize', 'fileData', (results, cb) => { // write in parallel to master
       if (!Array.isArray(storage.config.replicas) || storage.config.replicas.length === 0) return void cb(); // no replicas to write to
@@ -129,7 +130,7 @@ function writeToReplica(replica, fileKey, file, opts, cb) {
       // use caching provided by the specific environment storage config
       file.headers.CacheControl = headers['cache-control'] || results.storage.config.cacheControl;
 
-      results.storage.store(fileKey, file, {}, cb);
+      retry(results.storage.store.bind(results.storage, fileKey, file, {}), results.config.retry, cb);
     }]
   }, cb);
 }

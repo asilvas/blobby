@@ -1,8 +1,10 @@
 import crypto from 'crypto';
 import async from 'async';
+import retry from '../../util/retry';
 
-export default (fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
-  dstClient.fetchInfo(fileKey, (err, dstHeaders) => {
+export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
+  const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
+  retry(dstClient.fetchInfo.bind(dstClient, fileKey), retryOpts, (err, dstHeaders) => {
     if (err) return void cb(err);
     if (!dstHeaders) return void cb(new Error(`File ${fileKey} not found`));
 
@@ -25,8 +27,8 @@ export default (fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
     // if we get this far, we're having to a do a deep content hash analysis, which can be very slow
 
     async.parallel([
-      cb => srcClient.fetch(fileKey, {}, cb),
-      cb => dstClient.fetch(fileKey, {}, cb)
+      cb => retry(srcClient.fetch.bind(srcClient, fileKey, {}), retryOpts, cb),
+      cb => retry(dstClient.fetch.bind(dstClient, fileKey, {}), retryOpts, cb)
     ], (err, results) => {
       if (err) return void cb(err); // failed to fetch src & dst
 

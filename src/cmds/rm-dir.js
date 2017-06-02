@@ -1,8 +1,8 @@
 import { getConfigs } from '../config';
 import getStorage from '../storage';
-import getComparer from '../compare';
 import Stats from '../stats';
 import async from 'async';
+import getConfigStoragePairs from './util/get-config-storage-pairs';
 
 export const command = 'rmdir <dir> <storage..>';
 export const desc = 'Delete files for the given directory and storage bindings and/or environments';
@@ -26,24 +26,7 @@ export const handler = argv => {
   getConfigs(argv, (err, configs) => {
     if (err) return void console.error(err);
 
-    let configStorages = {};
-    // every config+storage combo
-    configs.forEach(config => {
-      argv.storage.forEach(storage => {
-        const configStorageId = `${config.id}.${storage}`;
-        if (!configStorages[configStorageId]) {
-          configStorages[configStorageId] = {
-            id: configStorageId,
-            config: config,
-            storage: getStorage(config, storage)
-          };
-        }
-      });
-    });
-
-    // turn hash into array
-    configStorages = Object.keys(configStorages).map(id => configStorages[id]);
-
+    const configStorages = getConfigStoragePairs(argv, configs);
     configStorages.forEach(src => {
       tasks.push(getTask(argv, src, stats));
     });

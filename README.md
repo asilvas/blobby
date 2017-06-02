@@ -64,6 +64,9 @@ JSON, [JSON5](http://json5.org/), CommonJS, and
 | secure-secret | string | none | The secret required to decrypt secure configuration files |
 | secure-file | string | none | File to load that holds the secret required to decrypt secure configuration files |
 | mode | string | `"headers"` | Used when comparing files. For usage see [Compare Modes](#compare-modes) |
+| retry-min | number | `1000` | Minimum timeout (in ms) for first retry, where retries are applicable |
+| retry-factor | number | `2` | Multiple in time applied to retry attempts, where retries are applicable |
+| retry-attempts | number | `3` | Maximum retry attempts before failure is reported, where retries are applicable |
 
 Example using the default `NODE_ENV` environment variable to load config data:
 
@@ -95,6 +98,11 @@ blobby server --config-dir lib/config
 | storage.{id}.auth | string | none | Required to support Uploads and Deletes, see [Secure API Operations](#secure-api-operations) |
 | storage.{id}.replicas | arrayOf(string) | `[]` | Required to support Replication, see [File Replication](#file-replication) |
 | storage.{id}.options | Object | {} | Options provided to storage driver |
+| retry | RetryOptions | (optional) | Retry options used by some HTTP Server operations |
+| retry.min | number | `500` | Minimum timeout (in ms) for first retry |
+| retry.factor | number | `2` | Multiple in time applied to retry attempts |
+| retry.retries | number | `3` | Maximum retry attempts before failure is reported |
+
 
 ### Storage Drivers
 

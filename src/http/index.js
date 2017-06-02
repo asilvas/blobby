@@ -19,6 +19,10 @@ export default (argv, config) => {
     if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
     const pathParts = urlInfo.pathname.split('/');
     const storageId = pathParts[1];
+    if (!storageId || storageId === 'favicon.ico') { // benign, don't log
+      res.statusCode = 404;
+      return void res.end();
+    }
     let storage;
     try {
       storage = getStorage(config, storageId);

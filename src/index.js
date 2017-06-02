@@ -66,6 +66,21 @@ yargs
     default: true,
     type: 'boolean'
   })
+  .option('retry-min', {
+    describe: 'Minimum timeout (in ms) for first retry, where retries are applicable',
+    default: 1000,
+    type: 'number'
+  })
+  .option('retry-factor', {
+    describe: 'Multiple in time applied to retry attempts, where retries are applicable',
+    default: 2,
+    type: 'number'
+  })
+  .option('retry-attempts', {
+    describe: 'Maximum retry attempts before failure is reported, where retries are applicable',
+    default: 3,
+    type: 'number'
+  })
   .option('no-color', {
     describe: 'If color isn\'t desired or support, this flag can be set to turn off all color',
     default: false,
