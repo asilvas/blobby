@@ -235,6 +235,38 @@ for every replica, and uploads (or deletes) will fail if one of the replica's ca
 
 
 
+## Full Command List
+
+```
+Commands:
+  checkdir <dir> <storage..>  One-Way shallow directory compare between storage
+                              bindings and/or environments
+  check <storage..>           One-Way compare files between storage bindings
+                              and/or environments
+  compare <storage..>         Compare files between storage bindings and/or
+                              environments
+  copydir <dir> <storage..>   One-way shallow directory copy between storage
+                              bindings and/or environments
+  copy <storage..>            One-way copy of files between storage bindings
+                              and/or environments
+  shard <storage> <dir>       Look up the given shard for a given storage and
+                              path
+  initialize <storage..>      Perform any initialization tasks required by the
+                              given storage (ex: pre-creating bucket shards in
+                              S3)
+  repair <storage..>          Repair files between storage bindings and/or
+                              environments
+  rmdir <dir> <storage..>     Delete files for the given directory and storage
+                              bindings and/or environments
+  server                      Start HTTP API Server
+  acl <dir> <storage..>       Set ACL's for a given directory for the given
+                              storage bindings and/or environments
+  stats <storage..>           Compute stats for storage bindings and/or
+                              environments
+```
+
+
+
 ## Compare
 
 For comparing the difference between storage bindings
