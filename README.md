@@ -44,6 +44,7 @@ See `help` for a full list of commands:
 blobby help
 ```
 
+[Full Command List](#full-command-list)
 
 
 ## Options
