@@ -1,18 +1,22 @@
 import setHeaders from './set-headers';
 
 export default opts => {
-  const { storage, fileKey, req, res, contentType } = opts;
+  const { storage, fileKey, req, res, contentType, auth } = opts;
 
-  storage.fetchInfo(fileKey, (err, headers) => {
-    if (err) {
-      res.statusCode = 404;
-      return void res.end();
-    }
+  auth(err => {
+    const acl = err ? 'public' : 'private'; // if auth fails, pass as public request
 
-    opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : contentType;
-    opts.headers = headers;
-    res.statusCode = 204;
-    setHeaders(opts);
-    res.end();
+    storage.fetchInfo(fileKey, { acl }, (err, headers) => {
+      if (err) {
+        res.statusCode = 404;
+        return void res.end();
+      }
+
+      opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : contentType;
+      opts.headers = headers;
+      res.statusCode = 204;
+      setHeaders(opts);
+      res.end();
+    });
   });
 }
