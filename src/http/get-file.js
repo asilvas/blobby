@@ -23,16 +23,16 @@ export default opts => {
       opts.headers = headers;
       opts.data = data;
 
+      setHeaders(opts);
+
       if (isMatch) {
         // forward headers (again) as precaution
-        setHeaders(opts);
         res.statusCode = 304;
         return void res.end();
       }
 
       if (!compressFile(opts)) {
         // if not compressed, handle uncompressed response
-        setHeaders(opts);
         res.end(data);
       }
     });
