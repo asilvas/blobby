@@ -59,7 +59,7 @@ export default class Stats {
           color: 'white',
           align: 'center',
           formatter: stats => {
-            const info = stats && stats.info;
+            const info = typeof stats === 'object' && stats;
             const strs = [];
             if (info) {
               const active = info.state === 'running' ? chalk.bold.underline : chalk;
@@ -106,7 +106,7 @@ export default class Stats {
             }));
           }
 
-          return statInfo || ''; // empty string required if no stats
+          return (statInfo && statInfo.info) || ''; // empty string required if no stats
         })
       );
       return row;
