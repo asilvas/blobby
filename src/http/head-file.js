@@ -16,6 +16,11 @@ export default opts => {
       opts.headers = headers;
       res.statusCode = 204;
       setHeaders(opts);
+
+      if (headers.Size) { // force Content-Length on HEAD
+        res.setHeader('Content-Length', headers.Size);
+      }
+
       res.end();
     });
   });

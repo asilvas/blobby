@@ -2,6 +2,7 @@ import async from 'async';
 import getStorage from '../storage';
 import getConfig from '../config/get-config-by-id';
 import retry from '../util/retry';
+import setHeaders from './set-headers';
 
 export default opts => {
   const { auth, config, storage, fileKey, req, res, contentType, urlInfo } = opts;
@@ -98,8 +99,11 @@ export default opts => {
       return void res.end();
     }
 
-    // todo
-    res.statusCode = 204; // no body for successful uploads
+    const headers = results.writeMaster;
+    opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : ContentType;
+    opts.headers = headers;
+    res.statusCode = 204;
+    setHeaders(opts);
     res.end();
   });
 
