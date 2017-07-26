@@ -14,6 +14,13 @@ export default ({ storage, fileKey, urlInfo, res, headers, realContentType }) =>
     res.setHeader('Cache-Control', storage.config.cacheControl);
   }
 
+  if (headers.CustomHeaders) { // custom headers may be stored on the object
+    Object.keys(headers.CustomHeaders).forEach(k => {
+      const v = headers.CustomHeaders[k];
+      res.setHeader(`x-${k}`, v); // all custom headers are always forcefully prefixed
+    });
+  }
+
   if (urlInfo.query.download) {
     res.setHeader('Content-Disposition', `attachment; filename="${path.basename(fileKey)}"`);
   }

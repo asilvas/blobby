@@ -109,6 +109,7 @@ blobby server --config-dir lib/config
 
 * [blobby-s3](https://github.com/asilvas/blobby-s3) - An S3 storage client for Blobby, powered by Knox.
 * [blobby-fs](https://github.com/asilvas/blobby-fs) - A File System storage client for Blobby.
+* [blobby-gcp-storage](https://github.com/asilvas/blobby-gcp-storage) - An Google Cloud storage client for Blobby.
 
 
 ## Secure Configuration

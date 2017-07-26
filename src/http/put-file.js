@@ -22,7 +22,14 @@ export default opts => {
   // use request cache-control if avail, otherwise fallback storage setting
   const CacheControl = headers['cache-control'] || storage.config.cacheControl;
   const AccessControl = headers['x-amz-acl'] || storage.config.accessControl || 'public-read';
-  const fileInfo = { ContentType, CacheControl, AccessControl }; // storage file headers
+  const CustomHeaders = {};
+  Object.keys(headers).forEach(k => {
+    const xHeader = /^x\-(.*)$/.exec(k);
+    if (xHeader && k !== 'x-amz-acl') {
+      CustomHeaders[xHeader[1]] = headers[k]; // forward custom headers
+    }
+  });
+  const fileInfo = { ContentType, CacheControl, AccessControl, CustomHeaders }; // storage file headers
   if (ETag) fileInfo.ETag = ETag;
   if (LastModified) fileInfo.LastModified = LastModified;
 
