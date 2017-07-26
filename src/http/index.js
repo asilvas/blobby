@@ -19,7 +19,10 @@ export default (argv, config) => {
     if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
     const pathParts = urlInfo.pathname.split('/');
     const storageId = pathParts[1];
-    if (!storageId || storageId === 'favicon.ico') { // benign, don't log
+    if (!storageId) { // root is healthcheck
+      res.statusCode = 204;
+      return void res.end();
+    } else if (storageId === 'favicon.ico') { // benign, don't log
       res.statusCode = 404;
       return void res.end();
     }
