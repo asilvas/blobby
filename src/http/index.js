@@ -20,7 +20,7 @@ export default (argv, config) => {
     const pathParts = urlInfo.pathname.split('/');
     const storageId = pathParts[1];
     if (!storageId) { // root is healthcheck
-      res.statusCode = 204;
+      res.statusCode = 200;
       return void res.end();
     } else if (storageId === 'favicon.ico') { // benign, don't log
       res.statusCode = 404;
