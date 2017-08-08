@@ -17,7 +17,7 @@ export default (argv, config) => {
     const urlInfo = url.parse(req.url, true, true);
     const contentType = mimeTypes.lookup(path.extname(urlInfo.pathname)) || 'binary/octet-stream';
     if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
-    const pathParts = urlInfo.pathname.split('/');
+    const pathParts = decodeURI(urlInfo.pathname).split('/');
     const storageId = pathParts[1];
     if (!storageId) { // root is healthcheck
       res.statusCode = 200;
