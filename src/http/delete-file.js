@@ -29,7 +29,9 @@ export default opts => {
         cb(); // OK
       });
     },
-    writeMaster: ['authorize', (results, cb) => {
+    writeMaster: ['authorize', 'writeReplicas', (results, cb) => {
+      // ORDER MATTERS: we block on writing to replicas so that if a replica fails, the master will still reflect
+      //                the previous state. This way it can retried at a later time.
       retry(storage.remove.bind(storage, fileKey), config.retry, cb);
     }],
     writeReplicas: ['authorize', (results, cb) => { // write in parallel to master
