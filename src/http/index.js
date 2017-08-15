@@ -17,10 +17,18 @@ export default (argv, config) => {
     if (typeof config.httpHandler === 'function') {
       if (config.httpHandler(req, res) === false) return; // if handled by parent ignore request
     }
-    const urlInfo = url.parse(req.url, true, true);
+    let safeUrl;
+    try {
+      safeUrl = decodeURI(req.url);
+    } catch (ex) {
+      console.error(chalk.red(`Cannot decodeURI ${req.url}, err: ${ex.stack || ex}`));
+      res.writeHead(400); // bad request
+      return void res.end();
+    }
+    const urlInfo = url.parse(safeUrl, true, true);
     const contentType = mimeTypes.lookup(path.extname(urlInfo.pathname)) || 'binary/octet-stream';
     if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
-    const pathParts = decodeURI(urlInfo.pathname).split('/');
+    const pathParts = urlInfo.pathname.split('/');
     const storageId = pathParts[1];
     if (!storageId) { // root is healthcheck
       res.statusCode = 200;
