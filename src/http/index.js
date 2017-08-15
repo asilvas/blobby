@@ -14,6 +14,9 @@ import getAuthHandler from './get-auth';
 
 export default (argv, config) => {
   return (req, res) => {
+    if (typeof config.httpHandler === 'function') {
+      if (config.httpHandler(req, res) === false) return; // if handled by parent ignore request
+    }
     const urlInfo = url.parse(req.url, true, true);
     const contentType = mimeTypes.lookup(path.extname(urlInfo.pathname)) || 'binary/octet-stream';
     if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler

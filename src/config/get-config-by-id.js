@@ -48,6 +48,10 @@ export default (configName, argv, cb) => {
 
     const finalConfig = merge.recursive({}, defaultConfig, results.baseConfig, results.envConfig, results.secureConfig);
 
+    if (typeof finalConfig.httpHandler === 'string') {
+      finalConfig.httpHandler = require(path.resolve(finalConfig.httpHandler)); // app-relative path
+    }
+
     cb(null, finalConfig);
   });
 };
