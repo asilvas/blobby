@@ -110,6 +110,26 @@ function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstSto
 
       const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
 
+      if (argv.removeGhosts && !dstHeaders) { // only perform removal if removeDiffs is true and the destination object does not exist
+        const delta_min = (Date.now() - file.LastModified.getTime()) / 60000 /* ms/min */;
+        if (delta_min < 60) {
+          statInfo.error(new Error(`Cannot remove a difference newer than an hour: ${file.Key}`));
+          return void cb();
+        }
+
+        return void retry(srcStorage.remove.bind(srcStorage, file.Key), retryOpts, err => {
+          if (err) {
+            // if we fail to repair, now record error
+            statInfo.error(err);
+            return void cb();
+          }
+
+          // flag as repaired
+          statInfo.repair();
+          cb();
+        });
+      }
+      
       // repair
       retry(srcStorage.fetch.bind(srcStorage, file.Key), retryOpts, (err, info, buffer) => {
         if (err) {

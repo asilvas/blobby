@@ -65,6 +65,8 @@ JSON, [JSON5](http://json5.org/), CommonJS, and
 | secure-secret | string | none | The secret required to decrypt secure configuration files |
 | secure-file | string | none | File to load that holds the secret required to decrypt secure configuration files |
 | mode | string | `"headers"` | Used when comparing files. For usage see [Compare Modes](#compare-modes) |
+| recursive | boolean | `true` | Enable deep query (recursive subdirectories) for operations that support it |
+| removeGhosts | boolean | `false` | For `repair`'s if `true`, will remove missing file instances instead of copying to missing storage |
 | retry-min | number | `1000` | Minimum timeout (in ms) for first retry, where retries are applicable |
 | retry-factor | number | `2` | Multiple in time applied to retry attempts, where retries are applicable |
 | retry-attempts | number | `3` | Maximum retry attempts before failure is reported, where retries are applicable |

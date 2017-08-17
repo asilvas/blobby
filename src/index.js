@@ -66,6 +66,11 @@ yargs
     default: true,
     type: 'boolean'
   })
+  .option('removeGhosts', {
+    describe: 'For `repair`\'s if `true`, will remove missing file instances instead of copying to missing storage',
+    default: false,
+    type: 'boolean'
+  })
   .option('retry-min', {
     describe: 'Minimum timeout (in ms) for first retry, where retries are applicable',
     default: 1000,
