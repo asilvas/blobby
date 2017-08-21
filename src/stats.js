@@ -73,10 +73,10 @@ export default class Stats {
                 return active.bgGreen.black(`All ${info.srcFiles} match (${bytes(info.matchSize)})`);
               }
               else if (info.repairs > 0) {
-                return active.bgYellow.red(`${info.diffs.length} diffs (${bytes(info.diffSize)}), ${info.repairs} repairs, ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
+                return active.bgYellow.red(`${info.diffCount} diffs (${bytes(info.diffSize)}), ${info.repairs} repairs, ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
               }
               else {
-                return active.bgRed.yellow(`${info.diffs.length} diffs (${bytes(info.diffSize)}), ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
+                return active.bgRed.yellow(`${info.diffCount} diffs (${bytes(info.diffSize)}), ${info.matches} matches (${bytes(info.matchSize)}), ${info.srcFiles} files`);
               }
             } else if (stats && typeof stats === 'string') {
               return chalk.gray(stats); // push as-is
@@ -88,7 +88,9 @@ export default class Stats {
       });
     });
     let errors = [];
+    let errorCount = 0;
     let diffs = [];
+    let diffCount = 0;
     const $this = this;
     const rows = configStoragePairs.map(xPair => {
       const row = [`${xPair} (src)`] // y header
@@ -101,9 +103,11 @@ export default class Stats {
             errors = errors.concat(statInfo.info.errors.map(err => {
               return { pairId, err };
             }));
+            errorCount += statInfo.info.errorCount;
             diffs = diffs.concat(statInfo.info.diffs.map(file => {
               return { pairId, file };
             }));
+            diffCount += statInfo.info.diffCount;
           }
 
           return (statInfo && statInfo.info) || ''; // empty string required if no stats
@@ -137,7 +141,7 @@ export default class Stats {
             align: 'center'
           },
           {
-            value: `Last Errors (of ${errors.length})`,
+            value: `Last Errors (of ${errorCount})`,
             headerColor: 'cyan',
             color: 'red',
             align: 'center'
@@ -171,7 +175,7 @@ export default class Stats {
             align: 'center'
           },
           {
-            value: `Last Diffs (of ${diffs.length})`,
+            value: `Last Diffs (of ${diffCount})`,
             headerColor: 'cyan',
             color: 'red',
             align: 'center'
@@ -221,9 +225,11 @@ class StatInfo {
       matches: 0,
       matchSize: 0,
       diffs: [],
+      diffCount: 0,
       diffSize: 0,
       repairs: 0,
-      errors: []
+      errors: [],
+      errorCount: 0
     };
   }
 
@@ -238,11 +244,15 @@ class StatInfo {
     this.lastFile = file;
     this.info.srcFiles++;
     this.info.diffs.push(file);
+    this.info.diffs = this.info.diffs.slice(-10);
+    this.info.diffCount++;
     if (file && file.Size) this.info.diffSize += file.Size;
   }
 
   error(err) {
     this.info.errors.push(err);
+    this.info.errors = this.info.errors.slice(-10);
+    this.info.errorCount++;
   }
 
   repair() {
