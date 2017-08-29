@@ -1,4 +1,4 @@
-export default ({ storage, fileKey, urlInfo, res, headers, realContentType }) => {
+export default ({ storage, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
   // always available
   res.setHeader('Content-Type', realContentType);
 
@@ -23,5 +23,10 @@ export default ({ storage, fileKey, urlInfo, res, headers, realContentType }) =>
 
   if (urlInfo.query.download) {
     res.setHeader('Content-Disposition', `attachment; filename="${path.basename(fileKey)}"`);
+  }
+
+  if (typeof cors === 'object') {
+    // apply cors headers
+    Object.keys(cors).forEach(key => res.setHeader(key, cors[key]));
   }
 }
