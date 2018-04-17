@@ -177,6 +177,12 @@ curl -H "Authorization: ApiKey shhMySecret" http://localhost/myStorage/some/
 curl -XDELETE -H "Authorization: ApiKey shhMySecret" http://localhost/myStorage/some/file.jpg
 ```
 
+Default permissions will be applied via `storage.{id}.accessControl`, but can be overridden via the `x-amz-acl` header, like so:
+
+```
+curl -XPUT -H "x-amz-acl: private" -H "Authorization: ApiKey shhMySecret" --data-binary "@./some-file.jpg" http://localhost/myStorage/some/file.jpg
+```
+
 The above examples is a perfect segway into [Secure API Operations](#secure-api-operations).
 
 
