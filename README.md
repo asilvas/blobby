@@ -163,7 +163,7 @@ blobby server
 | --- | --- | --- | --- |
 | `GET` | `/{storageId}/{filePath}` | Public | Get a file from storage |
 | `HEAD` | `/{storageId}/{filePath}` | Public | Get info for file from storage |
-| `PUT` | `/{storageId}/{filePath}` | Secure | Create or overwrite file in storage |
+| `PUT` | `/{storageId}/{filePath}` | Secure | Create or overwrite file in storage. Supply `x-amz-copy-source` header (instead of body) if you wish to copy instead (experimental). |
 | `DELETE` | `/{storageId}/{filePath}` | Secure | Delete file from storage |
 | `GET` | `/{storageId}/{directoryPath}/` | Secure | Get directory contents by postfixing the path with `/` |
 | `DELETE` | `/{storageId}/{filePath}/` | Secure | Delete directory (recursively) from storage |
