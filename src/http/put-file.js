@@ -23,6 +23,9 @@ export default opts => {
   const CacheControl = headers['cache-control'] || storage.config.cacheControl;
   const AccessControl = headers['x-amz-acl'] || storage.config.accessControl || 'public-read';
   const CopySource = headers['x-amz-copy-source'];
+  const copySourceSplit = CopySource && CopySource.split(':');
+  const SourceBucket = copySourceSplit && copySourceSplit.length >= 2 && copySourceSplit[0];
+  const sourceKey = copySourceSplit && copySourceSplit[copySourceSplit.length - 1];
   const CopySupport = CopySource
     && typeof storage.copy === 'function'
     && storage.config.replicas.reduce((state, r) => !state ? false : typeof storage.copy === 'function', true)
@@ -34,13 +37,13 @@ export default opts => {
       CustomHeaders[xHeader[1]] = headers[k]; // forward custom headers
     }
   });
-  const fileInfo = { ContentType, CacheControl, AccessControl, CustomHeaders }; // storage file headers
+  const fileInfo = { ContentType, CacheControl, AccessControl, CustomHeaders, bucket: SourceBucket }; // storage file headers
   if (ETag) fileInfo.ETag = ETag;
   if (LastModified) fileInfo.LastModified = LastModified;
 
   const getReplicaTask = (replica, file) => {
     return cb => {
-      writeToReplica(replica, CopySource, fileKey, file, opts, cb);
+      writeToReplica(replica, sourceKey, fileKey, file, opts, cb);
     }
   };
 
@@ -56,14 +59,16 @@ export default opts => {
       });
     },
     copyFile: ['authorize', (results, cb) => {
-      if (!CopySource || CopySupport) return void cb(null, { headers: fileInfo }); // if we are not copying, or have native copy support, no need for copy data
+      if (!sourceKey || CopySupport) return void cb(null, { headers: fileInfo }); // if we are not copying, or have native copy support, no need for copy data
 
-      storage.fetch(CopySource, { acl: 'private' }, (err, headers, buffer) => {
+      storage.fetch(sourceKey, { acl: 'private' }, (err, headers, buffer) => {
         if (err) {
           res.statusCode = 404;
           return void cb(err);
         }
   
+        headers.bucket = sourceBucket;
+
         cb(null, { headers, buffer });
       });  
     }],
@@ -102,8 +107,8 @@ export default opts => {
       });      
     }],
     writeMaster: ['authorize', 'file', (results, cb) => {
-      const op = CopySource && storage.copy
-        ? storage.copy.bind(storage, CopySource, fileKey, results.file.headers)
+      const op = sourceKey && storage.copy
+        ? storage.copy.bind(storage, sourceKey, fileKey, results.file.headers)
         : storage.store.bind(storage, fileKey, results.file, {})
       ;
       retry(op, config.retry, cb);
