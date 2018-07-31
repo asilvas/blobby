@@ -26,7 +26,7 @@ export default opts => {
   const copySourceSplit = CopySource && CopySource.split(':');
   const SourceBucket = copySourceSplit && copySourceSplit.length >= 2 && copySourceSplit[0];
   const sourceKey = copySourceSplit && copySourceSplit[copySourceSplit.length - 1];
-  const CopySupport = CopySource
+  const isCopySupported = CopySource
     && typeof storage.copy === 'function'
     && storage.config.replicas.reduce((state, r) => !state ? false : typeof storage.copy === 'function', true)
   ; // all-or-nothing native copy support
@@ -59,7 +59,8 @@ export default opts => {
       });
     },
     copyFile: ['authorize', (results, cb) => {
-      if (!sourceKey || CopySupport) return void cb(null, { headers: fileInfo }); // if we are not copying, or have native copy support, no need for copy data
+      if (!sourceKey) return void cb(); // we are not copying
+      if (isCopySupported) return void cb(null, { headers: fileInfo }); // if we have native copy support, no need for copy data
 
       storage.fetch(sourceKey, { acl: 'private' }, (err, headers, buffer) => {
         if (err) {
@@ -73,7 +74,7 @@ export default opts => {
       });  
     }],
     file: ['copyFile', (results, cb) => {
-      if (results.copyFile || CopySupport) {
+      if (results.copyFile || isCopySupported) {
         req.resume();
         return void cb(null, results.copyFile); // return now if copyData OR native copy support is provided
       }
