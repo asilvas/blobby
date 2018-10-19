@@ -2,7 +2,7 @@ import configShield from 'config-shield';
 import path from 'path';
 import fs from 'fs';
 import json5 from 'json5';
-import merge from 'merge';
+import extend from 'extend';
 import async from 'async';
 import defaultConfig from './default-config';
 
@@ -35,7 +35,7 @@ export default (configName, argv, cb) => {
         if (err) return void cb(err);
 
         const config = {};
-        // merge secure config into base config
+        // extend secure config into base config
         secureConfig.getKeys().forEach(k => {
           config[k] = secureConfig.getProp(k);
         });
@@ -46,7 +46,7 @@ export default (configName, argv, cb) => {
   }, (err, results) => {
     if (err) return void cb(err);
 
-    const finalConfig = merge.recursive({}, defaultConfig, results.baseConfig, results.envConfig, results.secureConfig);
+    const finalConfig = extend(true, {}, defaultConfig, results.baseConfig, results.envConfig, results.secureConfig);
 
     if (typeof finalConfig.httpHandler === 'string') {
       finalConfig.httpHandler = require(path.resolve(finalConfig.httpHandler)); // app-relative path
