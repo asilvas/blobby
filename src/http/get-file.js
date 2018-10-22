@@ -3,9 +3,8 @@ import compressFile from './compress-file';
 
 export default opts => {
   const { storage, fileKey, req, res, contentType, auth } = opts;
-
   auth(err => {
-    const acl = err ? 'public' : 'private'; // if auth fails, pass as public request
+    const acl = err && !auth.skip ? 'public' : 'private'; // if auth fails, pass as public request
 
     storage.fetch(fileKey, { acl }, (err, headers, data) => {
       if (err) {

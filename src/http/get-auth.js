@@ -5,7 +5,6 @@ const g_AuthDrivers = {};
 export default opts => {
   const { config, storage, req, fileKey } = opts;
   if (!config.auth) return; // auth config not avail
-
   const storageConfig = config.storage[storage.id];
   const authId = storageConfig.auth;
   const authConfig = config.auth[authId];
@@ -33,5 +32,6 @@ function getAuthHandler(req, fileKey, storageId, authId, authConfig, driver) {
     driver(req, storageId, fileKey, authConfig.options || {}, cb);
   };
   handler.id = authId;
+  handler.skip = authConfig.options.skipAuth;
   return handler;
 }
