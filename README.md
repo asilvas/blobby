@@ -90,6 +90,7 @@ blobby server --config-dir lib/config
 | http.{id}.ssl | Object | (required if enabling SSL) | See [Node.js TLS Options](https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options) | http.{id}.ssl.pfx | Buffer or string | none | If string will attempt to load pfx from disk |
 | http.{id}.ssl.key | Buffer or string | none | If string will attempt to load private key from disk |
 | http.{id}.ssl.cert | Buffer or string | none | If string will attempt to load certificate from disk |
+| httpAgent | Object|Boolean | [Defaults](https://github.com/asilvas/blobby/blob/master/src/config/default-config.js#L2) | If provided will initialize global [http(s) agents](https://nodejs.org/dist/latest-v11.x/docs/api/http.html#http_new_agent_options) with these options |
 | httpHandler | string | undefined | If path is provided to a module (`Function(req, res)`) will allow parent app to peek into incoming requests. If handler returns `false` Blobby will ignore the request altogether and assume parent is handling the response |
 | storage | StorageBindings | (required) | Collection of storage bindings |
 | storage.{id} | StorageBinding| (required) | Storage Binding Object |

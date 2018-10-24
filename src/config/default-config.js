@@ -1,4 +1,11 @@
 export default {
+  httpAgent: {
+    keepAlive: true, // default: false
+    keepAliveMsecs: 1000, // default: 1000
+    maxSockets: Infinity, // default: Infinity
+    maxFreeSockets: 256, // default: 256
+    timeout: undefined // default: undefined
+  },
   retry: {
     min: 500,
     factor: 2,

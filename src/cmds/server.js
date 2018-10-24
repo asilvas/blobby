@@ -10,9 +10,6 @@ export const desc = 'Start HTTP API Server';
 export const builder = {
 };
 
-// disable connection pooling across the board -- we'll handle pooling if needed on a case by case basis
-http.globalAgent = https.globalAgent = false;
-
 export const handler = argv => {
   getConfigs(argv, (err, configs) => {
     if (err) return void console.error(err.stack || err);
@@ -42,6 +39,11 @@ export const handler = argv => {
     });
   });
 };
+
+function initializeGlobalAgents({ httpAgent }) {
+  http.globalAgent = typeof httpAgent === 'object' ? new http.Agent(httpAgent) : httpAgent;
+  https.globalAgent = typeof httpAgent === 'object' ? new https.Agent(httpAgent) : httpAgent;
+}
 
 function createServerTask(argv, config, httpConfig) {
   return cb => {
