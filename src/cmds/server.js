@@ -4,6 +4,8 @@ import http from 'http';
 import https from 'https';
 import httpServer from '../http';
 import chalk from 'chalk';
+import Agent from 'agentkeepalive';
+const HttpsAgent = Agent.HttpsAgent;
 
 export const command = 'server';
 export const desc = 'Start HTTP API Server';
@@ -27,6 +29,8 @@ export const handler = argv => {
 
     if (!httpConfigs.length) httpConfigs.push({ port: 80 });
 
+    initializeGlobalAgents(config);
+
     const serverTasks = httpConfigs.map(httpConfig => createServerTask(argv, config, httpConfig));
 
     async.series(serverTasks, err => {
@@ -41,8 +45,8 @@ export const handler = argv => {
 };
 
 function initializeGlobalAgents({ httpAgent }) {
-  http.globalAgent = typeof httpAgent === 'object' ? new http.Agent(httpAgent) : httpAgent;
-  https.globalAgent = typeof httpAgent === 'object' ? new https.Agent(httpAgent) : httpAgent;
+  http.globalAgent = httpAgent === false ? false : new Agent(httpAgent);
+  https.globalAgent = httpAgent === false ? false : new HttpsAgent(httpAgent);
 }
 
 function createServerTask(argv, config, httpConfig) {
