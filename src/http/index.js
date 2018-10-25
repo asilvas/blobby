@@ -14,6 +14,9 @@ import getAuthHandler from './get-auth';
 
 export default (argv, config) => {
   return (req, res) => {
+    // disable TCP Nagle alg
+    res.socket.setNoDelay(true);
+
     if (typeof config.httpHandler === 'function') {
       if (config.httpHandler(req, res) === false) return; // if handled by parent ignore request
     }
