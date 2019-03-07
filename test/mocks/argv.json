@@ -1,0 +1,37 @@
+{
+  "silent": true,
+  "recursive": true,
+  "removeGhosts": false,
+  "no-color": false,
+  "noColor": false,
+  "help": false,
+  "config-dir": "./test/config",
+  "configDir": "./test/config",
+  "config-base": "defaults",
+  "configBase": "defaults",
+  "mode": "fast",
+  "config": [],
+  "config-env": "NODE_ENV",
+  "configEnv": "NODE_ENV",
+  "config-default": "local",
+  "configDefault": "local",
+  "config-exts": [
+    ".json",
+    ".json5",
+    ".js"
+  ],
+  "configExts": [
+    ".json",
+    ".json5",
+    ".js"
+  ],
+  "acl": "public-read",
+  "concurrency": 20,
+  "retry-min": 1000,
+  "retryMin": 1000,
+  "retry-factor": 2,
+  "retryFactor": 2,
+  "retry-attempts": 3,
+  "retryAttempts": 3,
+  "$0": "bin/blobby"
+}

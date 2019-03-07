@@ -6,8 +6,8 @@
   },
   staticFiles: {
     textFiles: {
-      test: '^\\/(.*\\.txt)?$',
-      path: './test/'
+      test: '^\\/static\\/(.*\\.txt)?$',
+      path: './test/static'
     }
   },
   auth: {
