@@ -113,6 +113,10 @@ blobby server --config-dir lib/config
 | cors.access-control-allow-methods | string | `GET` | Allow methods |
 | cors.access-control-allow-origin | string | `*` | Allow origins |
 | cors.access-control-max-age | string | `86400` | Cache duration of CORS headers |
+| auth | AuthOptions | (optional) | Collection of named auth groups |
+| auth.{id}.driver | string | (required) | Path of the driver to load, ala `blobby-auth-header` |
+| auth.{id}.options | Object | (optional) | Any options to pass to the auth driver |
+| auth.{id}.publicReads | Boolean | `true` | Set to false if GET's also require auth |
 
 
 ### Storage Drivers
