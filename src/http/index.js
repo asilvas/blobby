@@ -1,22 +1,21 @@
-import getStorage from '../storage';
-import url from 'url';
-import chalk from 'chalk';
-import mimeTypes from 'mime-types';
-import path from 'path';
-import headFile from './head-file';
-import getStatic from './get-static';
-import getFile from './get-file';
-import getFiles from './get-files';
-import putFile from './put-file';
-import deleteFile from './delete-file';
-import deleteFiles from './delete-files';
-import getAuthHandler from './get-auth';
+const url = require('url');
+const chalk = require('chalk');
+const mimeTypes = require('mime-types');
+const path = require('path');
+const headFile = require('./head-file');
+const getStatic = require('./get-static');
+const getFile = require('./get-file');
+const getFiles = require('./get-files');
+const putFile = require('./put-file');
+const deleteFile = require('./delete-file');
+const deleteFiles = require('./delete-files');
+const getAuthHandler = require('./get-auth');
+const BlobbyClient = require('blobby-client');
 
-export default (argv, config) => {
-  return (req, res) => {
-    // disable TCP Nagle alg
-    res.socket.setNoDelay(true);
+module.exports = (argv, config) => {
+  const client = new BlobbyClient(argv, config);
 
+  return async (req, res) => {
     if (typeof config.httpHandler === 'function') {
       if (config.httpHandler(req, res) === false) return; // if handled by parent ignore request
     }
@@ -42,7 +41,7 @@ export default (argv, config) => {
     }
     let storage;
     try {
-      storage = getStorage(config, storageId);
+      storage = client.getStorage(storageId);
     } catch (ex) {
       console.warn(chalk.yellow(ex.stack || ex));
 
@@ -52,28 +51,38 @@ export default (argv, config) => {
     }
 
     const fileKey = pathParts.slice(2).join('/');
-    const opts = { argv, config, storage, fileKey, urlInfo, req, res, contentType };
-    opts.auth = getAuthHandler(opts);
-    switch (req.method) {
-      case 'HEAD':
-        headFile(opts);
-        break;
-      case 'GET':
-        if (pathParts[pathParts.length - 1] === '') getFiles(opts); // if path ends in `/` it's a directory request
-        else getFile(opts);
-        break;
-      case 'PUT':
-        putFile(opts);
-        break;
-      case 'DELETE':
-        if (pathParts[pathParts.length - 1] === '') deleteFiles(opts); // if path ends in `/` it's a directory request
-        else deleteFile(opts);
-        break;
-      default:
-        console.error(chalk.red(`Invalid req.method ${req.method}`));
-        res.writeHead(404);
-        res.end();
-        break;
+    const opts = { isAuthorized: true, argv, config, client, storage, fileKey, urlInfo, req, res, contentType, headers: req.headers || req.getAllHeaders() };
+    try {
+      const auth = getAuthHandler(opts);
+      if (auth) {
+        opts.isAuthorized = await auth;
+      }
+      switch (req.method) {
+        case 'HEAD':
+          await headFile(opts);
+          break;
+        case 'GET':
+          if (pathParts[pathParts.length - 1] === '') await getFiles(opts); // if path ends in `/` it's a directory request
+          else await getFile(opts);
+          break;
+        case 'PUT':
+          await putFile(opts);
+          break;
+        case 'DELETE':
+          if (pathParts[pathParts.length - 1] === '') await deleteFiles(opts); // if path ends in `/` it's a directory request
+          else await deleteFile(opts);
+          break;
+        default:
+          console.error(chalk.red(`Unsupported req.method ${req.method}`));
+          res.writeHead(404);
+          res.end();
+          break;
+      }
+    } catch (err) {
+      const status = err.statusCode || 500;
+      console.error(chalk[status >= 500 ? 'red' : 'yellow'](`Error ${status}:`, err.stack || err));
+      res.statusCode = status;
+      return void res.end();
     }
-  }
-}
+  };
+};

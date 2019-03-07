@@ -1,27 +1,26 @@
-import setHeaders from './set-headers';
+const setHeaders = require('./set-headers');
 
-export default opts => {
-  const { storage, fileKey, req, res, contentType, auth } = opts;
+module.exports = async opts => {
+  const { client, storage, fileKey, res, contentType, isAuthorized } = opts;
 
-  auth(err => {
-    const acl = err ? 'public' : 'private'; // if auth fails, pass as public request
+  const acl = !isAuthorized ? 'public' : 'private'; // if auth fails, pass as public request
 
-    storage.fetchInfo(fileKey, { acl }, (err, headers) => {
-      if (err) {
-        res.statusCode = 404;
-        return void res.end();
-      }
+  try {
+    const headers = await client.headFile(storage, fileKey, { acl });
 
-      opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : contentType;
-      opts.headers = headers;
-      res.statusCode = 204;
-      setHeaders(opts);
+    opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : contentType;
+    opts.headers = headers;
+    res.statusCode = 204;
+    setHeaders(opts);
 
-      if (headers.Size) { // force Content-Length on HEAD
-        res.setHeader('Content-Length', headers.Size);
-      }
+    if (headers.Size) { // force Content-Length on HEAD
+      res.setHeader('Content-Length', headers.Size);
+    }
 
-      res.end();
-    });
-  });
-}
+    res.end();
+  } catch (err) {
+    err.statusCode = 404;
+    throw err;
+  }
+
+};

@@ -1,24 +1,26 @@
-import retry from '../../util/retry';
+const retry = require('../../util/retry');
 
-export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
+module.exports = ({ argv, fileKey, srcHeaders, dstStorage }, cb) => {
   const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
-  retry(dstClient.fetchInfo.bind(dstClient, fileKey), retryOpts, (err, dstHeaders) => {
+
+  retry(dstStorage.fetchInfo.bind(dstStorage, fileKey), retryOpts, (err, dstHeaders) => {
     if (err) return void cb(err);
     if (!dstHeaders) return void cb(new Error(`File ${fileKey} not found`));
 
-    let isMatch = (
-      (srcHeaders.ETag && dstHeaders.ETag) ? // use etag first if avail
-      srcHeaders.ETag === dstHeaders.ETag :
-      (srcHeaders.LastModified && dstHeaders.LastModified) ? // use last-modified 2nd if avail
-      srcHeaders.LastModified.getTime() === dstHeaders.LastModified.getTime()
-      : false /* default to false in headers mode if necessary headers are not available */
-    );
-
+    const etagMatch = (srcHeaders.ETag && dstHeaders.ETag)
+      ? srcHeaders.ETag === dstHeaders.ETag
+      : false
+    ;
+    const lastModifiedMatch = (!etagMatch && srcHeaders.LastModified && dstHeaders.LastModified)
+      ? srcHeaders.LastModified.getTime() === dstHeaders.LastModified.getTime()
+      : false
+    ;
+    let isMatch = etagMatch || lastModifiedMatch;
     if (srcHeaders.Size && dstHeaders.Size && srcHeaders.Size !== dstHeaders.Size) {
-      // Size differs, no match
+      // if Size differs, there's no reason to attempt hash
       isMatch = false;
     }
 
     cb(null, isMatch, srcHeaders, dstHeaders);
   });
-}
+};

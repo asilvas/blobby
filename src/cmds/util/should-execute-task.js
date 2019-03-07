@@ -1,4 +1,4 @@
-export default (argv, src, dst) => {
+module.exports = (argv, src, dst) => {
   if (src.id === dst.id) return false; // do not create a task against itself, ignore
 
   if (argv.oneWay === true) {
@@ -15,4 +15,4 @@ export default (argv, src, dst) => {
   }
 
   return true;
-}
+};

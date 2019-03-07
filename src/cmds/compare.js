@@ -1,28 +1,28 @@
-import { getConfigs } from '../config';
-import getStorage from '../storage';
-import getComparer from '../compare';
-import Stats from '../stats';
-import async from 'async';
-import shouldExecuteTask from './util/should-execute-task';
-import getConfigStoragePairs from './util/get-config-storage-pairs';
-
-export const command = 'compare <storage..>';
-export const desc = 'Compare files between storage bindings and/or environments';
-export const builder = {
-  storage: {
-    describe: 'Provide one or more storage bindings you wish to compare',
-    type: 'array'
-  }
-};
+const { getConfigs } = require('blobby-client');
+const getComparer = require('../compare');
+const Stats = require('../stats');
+const async = require('async');
+const shouldExecuteTask = require('./util/should-execute-task');
+const getConfigStoragePairs = require('./util/get-config-storage-pairs');
 
 let gLastKey = '';
 
-export const handler = argv => {
-  const stats = new Stats();
+module.exports = {
+  command: 'compare <storage..>',
+  desc: 'Compare files between storage bindings and/or environments',
+  builder: {
+    storage: {
+      describe: 'Provide one or more storage bindings you wish to compare',
+      type: 'array'
+    }
+  },
+  handler: async argv => {
+    argv.logger = argv.logger || console;
 
-  const compareTasks = [];
-  getConfigs(argv, (err, configs) => {
-    if (err) return void console.error(err);
+    const stats = new Stats();
+
+    const compareTasks = [];
+    const configs = await getConfigs(argv);
 
     const configStorages = getConfigStoragePairs(argv, configs);
     configStorages.forEach(src => {
@@ -33,35 +33,38 @@ export const handler = argv => {
       });
     });
 
-    if (compareTasks.length === 0) return void console.error('No comparison tasks detected, see help');
+    if (compareTasks.length === 0) return void argv.logger.error('No comparison tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nComparing...`), 5000);
+    const statsTimer = setInterval(() => argv.logger.log(`LastKey: ${gLastKey}\n${!argv.silent && stats.toString()}\nComparing...`), 5000);
     statsTimer.unref();
 
     // process all comparisons
-    async.series(compareTasks, (err, results) => {
-      clearInterval(statsTimer);
-      console.log(stats.toString());
+    return new Promise(resolve => {
+      async.series(compareTasks, (err, results) => {
+        clearInterval(statsTimer);
+        !argv.silent && argv.logger.log(stats.toString());
 
-      if (err) {
-        console.error('File comparison has failed, aborting...', err);
-      } else {
-        console.log('Comparison complete');
-      }
+        if (err) {
+          argv.logger.error('File comparison has failed, aborting...', err);
+        } else {
+          argv.logger.log('Comparison complete');
+        }
+
+        resolve();
+      });
     });
-    
-  });
+  }
 };
 
 function getCompareTask(argv, src, dst, stats) {
   const statInfo = stats.getStats(src.config, src.storage, dst.config, dst.storage);
   return cb => {
     statInfo.running();
-    compare(argv, src.config, src.storage, dst.config, dst.storage, statInfo, (err) => {
+    compare({ argv, srcConfig: src.config, srcStorage: src.storage, dstConfig: dst.config, dstStorage: dst.storage, statInfo }, (err) => {
       statInfo.complete();
 
       if (err) {
-        console.error('Compare failure:', err.stack || err); // log only, do not abort repair
+        argv.logger.error('Compare failure:', err.stack || err); // log only, do not abort repair
       }
 
       cb();
@@ -69,13 +72,13 @@ function getCompareTask(argv, src, dst, stats) {
   };
 }
 
-function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, cb) {
+function compare({ argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo }, cb) {
   const { mode, dir } = argv;
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
     gLastKey = lastKey;
     const compareFileTasks = files.map(f => {
-      return getCompareFileTask(f, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo);
+      return getCompareFileTask({ file: f, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo });
     });
 
     async.parallelLimit(compareFileTasks, argv.concurrency || 20, (err) => {
@@ -92,10 +95,10 @@ function compare(argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo, c
   srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000 }, compareFiles);
 }
 
-function getCompareFileTask(file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo) {
+function getCompareFileTask({ file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo }) {
   const { mode } = argv;
   return cb => {
-    getComparer(argv, file.Key, file, srcStorage, dstStorage, mode, (err, isMatch, srcHeaders, dstHeaders) => {
+    getComparer({ argv, fileKey: file.Key, srcHeaders: file, srcStorage, dstStorage, mode }, (err, isMatch, srcHeaders, dstHeaders) => {
       if (err || isMatch === false) {
         // errors are implied to be "not found", just track as difference
         statInfo.diff(file);

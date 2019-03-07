@@ -1,68 +1,71 @@
-import { getConfigs } from '../config';
-import getStorage from '../storage';
-import Stats from '../stats';
-import async from 'async';
-import getConfigStoragePairs from './util/get-config-storage-pairs';
-
-export const command = 'rmdir <dir> <storage..>';
-export const desc = 'Delete files for the given directory and storage bindings and/or environments';
-export const builder = {
-  dir: {
-    describe: 'Directory to search',
-    type: 'string'
-  },
-  storage: {
-    describe: 'Provide two or more storage bindings you wish to synchronize',
-    type: 'array'
-  }
-};
+const BlobbyClient = require('blobby-client');
+const async = require('async');
+const Stats = require('../stats');
+const getConfigStoragePairs = require('./util/get-config-storage-pairs');
 
 let gLastKey = '';
 
-export const handler = argv => {
-  const stats = new Stats();
+module.exports = {
+  command: 'rmdir <dir> <storage..>',
+  desc: 'Delete files for the given directory and storage bindings and/or environments',
+  builder: {
+    dir: {
+      describe: 'Directory to search',
+      type: 'string'
+    },
+    storage: {
+      describe: 'Provide two or more storage bindings you wish to synchronize',
+      type: 'array'
+    }
+  },
+  handler: async argv => {
+    argv.logger = argv.logger || console;
 
-  const tasks = [];
-  getConfigs(argv, (err, configs) => {
-    if (err) return void console.error(err);
+    const stats = new Stats();
+
+    const tasks = [];
+    const configs = await BlobbyClient.getConfigs(argv);
 
     const configStorages = getConfigStoragePairs(argv, configs);
     configStorages.forEach(src => {
       tasks.push(getTask(argv, src, stats));
     });
 
-    if (tasks.length === 0) return void console.error('No tasks detected, see help');
+    if (tasks.length === 0) return void argv.logger.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => console.log(`LastKey: ${gLastKey}\n${stats.toString()}\nRemoving files...`), 5000);
+    const statsTimer = setInterval(() => argv.logger.log(`LastKey: ${gLastKey}\n${!argv.silent && stats.toString()}\nRemoving files...`), 5000);
     statsTimer.unref();
 
-    // process all comparisons
-    async.series(tasks, (err, results) => {
-      clearInterval(statsTimer);
-      console.log(stats.toString());
+    return new Promise(resolve => {
+      // process all comparisons
+      async.series(tasks, (err, results) => {
+        clearInterval(statsTimer);
+        !argv.silent && argv.logger.log(stats.toString());
 
-      if (err) {
-        console.error('Removing files has failed, aborting...', err);
-      } else {
-        console.log('File deletion complete');
-      }
+        if (err) {
+          argv.logger.error('Removing files has failed, aborting...', err);
+        } else {
+          argv.logger.log('File deletion complete');
+        }
+
+        resolve();
+      });
     });
-    
-  });
+  }
 };
 
 function getTask(argv, src, stats) {
   const statInfo = stats.getStats(src.config, src.storage);
   return cb => {
     statInfo.running();
-    task(argv, src.config, src.storage, statInfo, (err) => {
+    task({ argv, srcConfig: src.config, srcStorage: src.storage, statInfo }, (err) => {
       statInfo.complete();
       cb(err);
     });
   };
 }
 
-function task(argv, srcConfig, srcStorage, statInfo, cb) {
+function task({ argv, srcConfig, srcStorage, statInfo }, cb) {
   const nextFiles = (err, files, dirs, lastKey) => {
     if (err) {
       statInfo.error(err);

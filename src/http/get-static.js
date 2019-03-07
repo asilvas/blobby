@@ -1,7 +1,7 @@
-import fs from 'fs';
-import compressFile from './compress-file';
-import crypto from 'crypto';
-import path from 'path';
+const fs = require('fs');
+const compressFile = require('./compress-file');
+const crypto = require('crypto');
+const path = require('path');
 
 /* Static `files` is an experimental (read: undocumented)
    feature and should not be used at this time.
@@ -9,7 +9,7 @@ import path from 'path';
 
 let gCompiledTests;
 
-export default (argv, config, opts) => {
+module.exports = (argv, config, opts) => {
   const { req, res, urlInfo, contentType } = opts;
   const { staticFiles } = config;
   if (!staticFiles) return false; // disabled
@@ -20,13 +20,13 @@ export default (argv, config, opts) => {
     const filename = result && result[1];
     if (!filename) continue;
 
-    processFile(t, filename, argv, config, opts);
+    processFile(t, filename, opts);
 
     return true; // route match, process static request
   }
 
   return false; // no matches, continue
-}
+};
 
 function getCompiledTests(argv, staticFiles) {
   return Object.keys(staticFiles).map(k => {
@@ -38,8 +38,8 @@ function getCompiledTests(argv, staticFiles) {
   });
 }
 
-function processFile(test, filename, argv, config, opts) {
-  const { req, res, urlInfo, contentType } = opts;
+function processFile(test, filename, opts) {
+  const { headers, res, urlInfo, contentType } = opts;
 
   getFileData(test, filename, (err, headers, data) => {
     if (err) {
@@ -52,12 +52,12 @@ function processFile(test, filename, argv, config, opts) {
     res.setHeader('ETag', headers.ETag);
 
     // if etag match, respond with 304
-    const isMatch = (req.headers['if-none-match'] && headers.ETag && req.headers['if-none-match'] === headers.ETag);
+    const isMatch = (headers['if-none-match'] && headers.ETag && headers['if-none-match'] === headers.ETag);
     if (isMatch) {
       res.statusCode = 304;
       return void res.end();
     }
-    
+
     opts.headers = headers;
     opts.realContentType = contentType;
     opts.data = data;

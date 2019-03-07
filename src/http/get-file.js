@@ -1,41 +1,41 @@
-import setHeaders from './set-headers';
-import compressFile from './compress-file';
+const setHeaders = require('./set-headers');
+const compressFile = require('./compress-file');
 
-export default opts => {
-  const { storage, fileKey, req, res, contentType, auth } = opts;
+module.exports = async opts => {
+  const { client, storage, fileKey, res, contentType, isAuthorized } = opts;
 
-  auth(err => {
-    const acl = err ? 'public' : 'private'; // if auth fails, pass as public request
+  const acl = !isAuthorized ? 'public' : 'private'; // if auth fails, pass as public request
+  let result;
+  try {
+    result = await client.getFile(storage, fileKey, { acl });
+  } catch (err) {
+    err.statusCode = 404;
+    throw err;
+  }
 
-    storage.fetch(fileKey, { acl }, (err, headers, data) => {
-      if (err) {
-        res.statusCode = 404;
-        return void res.end();
-      }
+  const [headers, data] = result;
 
-      opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : contentType;
+  opts.realContentType = headers.ContentType && headers.ContentType !== 'binary/octet-stream' ? headers.ContentType : contentType;
 
-      // if etag or last-modified suffice, respond with 304
-      const isMatch = (req.headers['if-none-match'] && headers.ETag && req.headers['if-none-match'] === headers.ETag) || 
-        (req.headers['if-last-modified'] && headers.LastModified && new Date(req.headers['if-last-modified']) >= headers.LastModified)
-      ;
+  // if etag or last-modified suffice, respond with 304
+  const isMatch = (opts.headers['if-none-match'] && headers.ETag && opts.headers['if-none-match'] === headers.ETag) ||
+    (opts.headers['if-last-modified'] && headers.LastModified && new Date(opts.headers['if-last-modified']) >= headers.LastModified)
+  ;
 
-      opts.headers = headers;
-      opts.data = data;
+  opts.headers = headers;
+  opts.data = data;
 
-      setHeaders(opts);
+  setHeaders(opts);
 
-      if (isMatch) {
-        // forward headers (again) as precaution
-        res.statusCode = 304;
-        return void res.end();
-      }
+  if (isMatch) {
+    // forward headers (again) as precaution
+    res.statusCode = 304;
+    return void res.end();
+  }
 
-      if (!compressFile(opts)) {
-        // if not compressed, handle uncompressed response
-        res.end(data);
-      }
-    });
-  });
+  if (!compressFile(opts)) {
+    // if not compressed, handle uncompressed response
+    res.end(data);
+  }
 
-}
+};

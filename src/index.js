@@ -1,9 +1,9 @@
-import yargs from 'yargs';
-import path from 'path';
-import pkg from '../package.json';
+const yargs = require('yargs');
+const path = require('path');
+const pkg = require('../package.json');
 
 yargs
-  .commandDir(path.resolve(__dirname, '..', 'lib', 'cmds'))
+  .commandDir(path.resolve(__dirname, '..', 'src', 'cmds'))
   .option('config', {
     describe: 'One or more configuration files (with or without extension)',
     type: 'array',
@@ -38,7 +38,7 @@ yargs
     describe: 'Directory of secure configuration files',
     type: 'string'
   })
-  /*.option('secure-secret', {
+  /* .option('secure-secret', {
     describe: 'The secret (or secrets if different per configuration) required to decrypt secure configuration files',
     type: 'string'
   })*/
@@ -88,6 +88,11 @@ yargs
   })
   .option('no-color', {
     describe: 'If color isn\'t desired or support, this flag can be set to turn off all color',
+    default: false,
+    type: 'boolean'
+  })
+  .option('silent', {
+    describe: 'Disable stats',
     default: false,
     type: 'boolean'
   })

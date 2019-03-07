@@ -1,4 +1,6 @@
-export default ({ storage, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
+const path = require('path');
+
+module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
   // always available
   res.setHeader('Content-Type', realContentType);
 
@@ -29,4 +31,4 @@ export default ({ storage, fileKey, urlInfo, res, headers, realContentType, conf
     // apply cors headers
     Object.keys(cors).forEach(key => res.setHeader(key, cors[key]));
   }
-}
+};

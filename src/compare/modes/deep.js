@@ -1,20 +1,22 @@
-import crypto from 'crypto';
-import async from 'async';
-import retry from '../../util/retry';
+const crypto = require('crypto');
+const async = require('async');
+const retry = require('../../util/retry');
 
-export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
+module.exports = ({ argv, fileKey, srcHeaders, srcStorage, dstStorage }, cb) => {
   const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
-  retry(dstClient.fetchInfo.bind(dstClient, fileKey), retryOpts, (err, dstHeaders) => {
+  retry(dstStorage.fetchInfo.bind(dstStorage, fileKey), retryOpts, (err, dstHeaders) => {
     if (err) return void cb(err);
     if (!dstHeaders) return void cb(new Error(`File ${fileKey} not found`));
 
-    let isMatch = (
-      (srcHeaders.ETag && dstHeaders.ETag) ? // use etag first if avail
-      srcHeaders.ETag === dstHeaders.ETag :
-      (srcHeaders.LastModified && dstHeaders.LastModified) ? // use last-modified 2nd if avail
-      srcHeaders.LastModified.getTime() === dstHeaders.LastModified.getTime()
-      : null /* default to unknown in deep mode if necessary headers not available */
-    );
+    const etagMatch = (srcHeaders.ETag && dstHeaders.ETag)
+      ? srcHeaders.ETag === dstHeaders.ETag
+      : null
+    ;
+    const lastModifiedMatch = (!etagMatch && srcHeaders.LastModified && dstHeaders.LastModified)
+      ? srcHeaders.LastModified.getTime() === dstHeaders.LastModified.getTime()
+      : null
+    ;
+    let isMatch = (etagMatch || lastModifiedMatch) || null;
 
     if (srcHeaders.Size && dstHeaders.Size && srcHeaders.Size !== dstHeaders.Size) {
       // if Size differs, there's no reason to attempt hash
@@ -27,8 +29,8 @@ export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
     // if we get this far, we're having to a do a deep content hash analysis, which can be very slow
 
     async.parallel([
-      cb => retry(srcClient.fetch.bind(srcClient, fileKey, {}), retryOpts, cb),
-      cb => retry(dstClient.fetch.bind(dstClient, fileKey, {}), retryOpts, cb)
+      cb => retry(srcStorage.fetch.bind(srcStorage, fileKey, {}), retryOpts, cb),
+      cb => retry(dstStorage.fetch.bind(dstStorage, fileKey, {}), retryOpts, cb)
     ], (err, results) => {
       if (err) return void cb(err); // failed to fetch src & dst
 
@@ -45,4 +47,4 @@ export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
       cb(null, srcHash === dstHash, srcHeaders, dstHeaders);
     });
   });
-}
+};

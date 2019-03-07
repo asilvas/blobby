@@ -1,16 +1,18 @@
-import {handler as RepairHandler} from './repair';
+const { handler } = require('./repair');
 
-export const command = 'copy <storage..>';
-export const desc = 'One-way copy of files between storage bindings and/or environments';
-export const builder = {
-  storage: {
-    describe: 'Provide two or more storage bindings you wish to synchronize',
-    type: 'array'
+module.exports = {
+  command: 'copy <storage..>',
+  desc: 'One-way copy of files between storage bindings and/or environments',
+  builder: {
+    storage: {
+      describe: 'Provide two or more storage bindings you wish to synchronize',
+      type: 'array'
+    }
+  },
+  handler: argv => {
+    argv.oneWay = true;
+    argv.logger = argv.logger || console;
+
+    return handler(argv);
   }
 };
-
-export const handler = argv => {
-  argv.oneWay = true;
-
-  RepairHandler(argv);
-}

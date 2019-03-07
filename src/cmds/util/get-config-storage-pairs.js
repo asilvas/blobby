@@ -1,6 +1,6 @@
-import getStorage from '../../storage';
+const BlobbyClient = require('blobby-client');
 
-export default (argv, configs) => {
+module.exports = (argv, configs) => {
   const configStorages = {};
   // compare every config+storage combo against one another
   configs.forEach(config => {
@@ -10,7 +10,7 @@ export default (argv, configs) => {
         configStorages[configStorageId] = {
           id: configStorageId,
           config: config,
-          storage: getStorage(config, storage)
+          storage: new BlobbyClient(argv, config).getStorage(storage)
         };
       }
     });
@@ -18,4 +18,4 @@ export default (argv, configs) => {
 
   // turn hash into array
   return Object.keys(configStorages).map(id => configStorages[id]);
-}
+};

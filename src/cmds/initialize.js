@@ -1,20 +1,21 @@
-import { getConfigs } from '../config';
-import getStorage from '../storage';
-import async from 'async';
+const BlobbyClient = require('blobby-client');
+const async = require('async');
 
-export const command = 'initialize <storage..>';
-export const desc = 'Perform any initialization tasks required by the given storage (ex: pre-creating bucket shards in S3)';
-export const builder = {
-  storage: {
-    describe: 'Provide one or more storage bindings you wish to initialize',
-    type: 'array'
-  }
-};
+module.exports = {
+  command: 'initialize <storage..>',
+  desc: 'Perform any initialization tasks required by the given storage (ex: pre-creating bucket shards in S3)',
+  builder: {
+    storage: {
+      describe: 'Provide one or more storage bindings you wish to initialize',
+      type: 'array'
+    }
+  },
+  handler: async argv => {
+    argv.logger = argv.logger || console;
 
-export const handler = argv => {
-  const tasks = [];
-  getConfigs(argv, (err, configs) => {
-    if (err) return void console.error(err);
+    const tasks = [];
+
+    const configs = await BlobbyClient.getConfigs(argv);
 
     let configStorages = {};
     // initialize every config+storage combo
@@ -25,7 +26,7 @@ export const handler = argv => {
           configStorages[configStorageId] = {
             id: configStorageId,
             config: config,
-            storage: getStorage(config, storage)
+            storage: new BlobbyClient(argv, config).getStorage(storage)
           };
         }
       });
@@ -41,16 +42,19 @@ export const handler = argv => {
 
     if (tasks.length === 0) return void console.error('No initialization tasks detected, see help');
 
-    // process all tasks
-    async.series(tasks, (err, results) => {
-      if (err) {
-        console.error('Initialization has failed, aborting...', err);
-      } else {
-        console.log('Initialization complete');
-      }
+    return new Promise(resolve => {
+      // process all tasks
+      async.series(tasks, (err, results) => {
+        if (err) {
+          argv.logger.error('Initialization has failed, aborting...', err);
+        } else {
+          argv.logger.log('Initialization complete');
+        }
+
+        resolve();
+      });
     });
-    
-  });
+  }
 };
 
 function getInitializeTask(src) {

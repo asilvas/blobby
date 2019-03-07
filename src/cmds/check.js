@@ -1,17 +1,18 @@
-import { getConfigs } from '../config';
-import {handler as CompareHandler} from './compare';
+const { handler } = require('./compare');
 
-export const command = 'check <storage..>';
-export const desc = 'One-Way compare files between storage bindings and/or environments';
-export const builder = {
-  storage: {
-    describe: 'Provide one or more storage bindings you wish to compare',
-    type: 'array'
+module.exports = {
+  command: 'check <storage..>',
+  desc: 'One-Way compare files between storage bindings and/or environments',
+  builder: {
+    storage: {
+      describe: 'Provide one or more storage bindings you wish to compare',
+      type: 'array'
+    }
+  },
+  handler: argv => {
+    argv.oneWay = true;
+    argv.logger = argv.logger || console;
+
+    return handler(argv);
   }
-};
-
-export const handler = argv => {
-  argv.oneWay = true;
-
-  CompareHandler(argv);
 };

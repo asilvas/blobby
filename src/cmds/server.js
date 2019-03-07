@@ -1,21 +1,24 @@
-import { getConfigs } from '../config';
-import async from 'async';
-import http from 'http';
-import https from 'https';
-import httpServer from '../http';
-import chalk from 'chalk';
-import Agent from 'agentkeepalive';
+const BlobbyClient = require('blobby-client');
+const async = require('async');
+const http = require('http');
+const https = require('https');
+const http2 = require('http2');
+const httpServer = require('../http');
+const chalk = require('chalk');
+const Agent = require('agentkeepalive');
 const HttpsAgent = Agent.HttpsAgent;
+const fs = require('fs');
 
-export const command = 'server';
-export const desc = 'Start HTTP API Server';
-export const builder = {
-};
+module.exports = {
+  command: 'server',
+  desc: 'Start HTTP API Server',
+  builder: {
+  },
+  handler: async argv => {
+    argv.logger = argv.logger || console;
 
-export const handler = argv => {
-  getConfigs(argv, (err, configs) => {
-    if (err) return void console.error(err.stack || err);
-    const config = configs[0];
+    const [config] = await BlobbyClient.getConfigs(argv);
+
     if (!config.http) return void console.error('Config.http object required');
     const httpConfigs = Object.keys(config.http).map(k => {
       const httpConfig = config.http[k];
@@ -33,15 +36,19 @@ export const handler = argv => {
 
     const serverTasks = httpConfigs.map(httpConfig => createServerTask(argv, config, httpConfig));
 
-    async.series(serverTasks, err => {
-      if (err) {
-        console.error('Failed to start server successfully');
-        console.error(err.stack || err);
-        console.error('Shutting down...');
-        process.exit();
-      }
+    return new Promise(resolve => {
+      async.series(serverTasks, (err, servers) => {
+        if (err) {
+          console.error('Failed to start server successfully');
+          console.error(err.stack || err);
+          console.error('Shutting down...');
+          process.exit();
+        }
+
+        resolve(servers);
+      });
     });
-  });
+  }
 };
 
 function initializeGlobalAgents({ httpAgent }) {
@@ -89,16 +96,20 @@ function createServerTask(argv, config, httpConfig) {
       if (err) return void console.error('Failed to create HTTP server:', httpConfig, err);
 
       if (httpConfig.ssl) {
-        https.createServer(httpConfig.ssl, httpServer(argv, config)).listen(httpConfig.port, httpConfig.host, httpConfig.backlog, err => {
+        const server = http2.createServer(httpConfig.ssl, httpServer(argv, config));
+        server.listen(httpConfig.port, httpConfig.host, httpConfig.backlog, err => {
           if (err) return void cb(err);
 
-          console.log(chalk.green(`Listening on https://${httpConfig.host}:${httpConfig.port}`));
+          console.log(chalk.green(`Listening on https://${httpConfig.host || 'localhost'}:${httpConfig.port}`));
+          cb(null, server);
         });
       } else {
-        http.createServer(httpServer(argv, config)).listen(httpConfig.port, httpConfig.host, httpConfig.backlog, err => {
+        const server = http.createServer(httpServer(argv, config));
+        server.listen(httpConfig.port, httpConfig.host || '127.0.0.1', err => {
           if (err) return void cb(err);
 
-          console.log(chalk.green(`Listening on http://${httpConfig.host}:${httpConfig.port}`));
+          console.log(chalk.green(`Listening on http://${httpConfig.host || 'localhost'}:${httpConfig.port}`));
+          cb(null, server);
         });
       }
     });

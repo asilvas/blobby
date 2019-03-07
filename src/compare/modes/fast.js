@@ -1,8 +1,8 @@
-import retry from '../../util/retry';
+const retry = require('../../util/retry');
 
-export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
+module.exports = ({ argv, fileKey, srcHeaders, dstStorage }, cb) => {
   const retryOpts = { min: argv.retryMin, factor: argv.retryFactor, retries: argv.retryAttempts };
-  retry(dstClient.fetchInfo.bind(dstClient, fileKey), retryOpts, (err, dstHeaders) => {
+  retry(dstStorage.fetchInfo.bind(dstStorage, fileKey), retryOpts, (err, dstHeaders) => {
     if (err) return void cb(err);
     if (!dstHeaders) return void cb(new Error(`File ${fileKey} not found`));
 
@@ -13,4 +13,4 @@ export default (argv, fileKey, srcHeaders, srcClient, dstClient, mode, cb) => {
 
     cb(null, isMatch, srcHeaders, dstHeaders);
   });
-}
+};
