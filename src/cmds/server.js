@@ -105,7 +105,7 @@ function createServerTask(argv, config, httpConfig) {
         });
       } else {
         const server = http.createServer(httpServer(argv, config));
-        server.listen(httpConfig.port, httpConfig.host || '127.0.0.1', err => {
+        server.listen(httpConfig.port, httpConfig.host, err => {
           if (err) return void cb(err);
 
           console.log(chalk.green(`Listening on http://${httpConfig.host || 'localhost'}:${httpConfig.port}`));
