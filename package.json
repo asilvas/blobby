@@ -30,7 +30,7 @@
   "dependencies": {
     "agentkeepalive": "^4.0.0",
     "async": "^2.6.1",
-    "blobby-client": "^1.0.2",
+    "blobby-client": "^1.0.3",
     "bytes": "^2.5.0",
     "chalk": "^1.1.3",
     "config-shield": "^0.2.0",
