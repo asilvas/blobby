@@ -1,4 +1,5 @@
 test/fs
+package-lock.json
 
 # Logs
 logs

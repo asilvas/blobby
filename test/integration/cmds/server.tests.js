@@ -2,7 +2,7 @@ const chai = require('chai');
 chai.use(require('sinon-chai'));
 const { expect } = chai;
 const cleanup = require('../../util/cleanup');
-const { writeFileSync, existsSync, mkdirSync } = require('fs');
+const { readFileSync, writeFileSync, existsSync, mkdirSync } = require('fs');
 const axios = require('axios');
 
 const getMocks = require('../../mocks');
@@ -83,11 +83,25 @@ describe('# src/cmds/server.js', async () => {
   it('PUT test1.txt to local storage', async () => {
     expect(existsSync('test/fs/local1/tmp/test1.txt')).to.be.false;
     const { data, status, headers } = await axios.put('http://localhost:4080/local/tmp/test1.txt', 'test1', {
-      headers: { ...mocks.authHeaders }
+      headers: { ...mocks.authHeaders, ETag: '123' }
     });
     expect(status).to.equal(204);
+    expect(headers.etag).to.not.equal('123');
     expect(headers['content-type']).to.equal('text/plain');
     expect(existsSync('test/fs/local1/tmp/test1.txt')).to.be.true;
+  });
+
+  it('PUT (COPY) source.txt to test1.txt', async () => {
+    writeFileSync('test/fs/local1/tmp/source.txt', 'source');
+    expect(existsSync('test/fs/local1/tmp/test1.txt')).to.be.false;
+    const { data, status, headers } = await axios.put('http://localhost:4080/local/tmp/test1.txt', '', {
+      headers: { ...mocks.authHeaders, 'x-amz-copy-source': 'local:tmp/source.txt', ETag: '123' }
+    });
+    expect(status).to.equal(204);
+    expect(headers.etag).to.not.equal('123');
+    expect(headers['content-type']).to.equal('text/plain');
+    expect(existsSync('test/fs/local1/tmp/test1.txt')).to.be.true;
+    expect(readFileSync('test/fs/local1/tmp/test1.txt', 'utf8')).to.equal('source');
   });
 
   it('PUT test1.txt (w/o) is restricted', async () => {
