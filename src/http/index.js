@@ -1,5 +1,4 @@
 const url = require('url');
-const chalk = require('chalk');
 const mimeTypes = require('mime-types');
 const path = require('path');
 const headFile = require('./head-file');
@@ -24,12 +23,13 @@ module.exports = (argv, config) => {
     try {
       safePathname = decodeURI(urlInfo.pathname);
     } catch (ex) {
-      console.error(chalk.red(`Cannot decodeURI ${urlInfo.pathname}, err: ${ex.stack || ex}`));
+      client.emit('error', { message: `Cannot decodeURI ${urlInfo.pathname}`, stack: ex.stack || ex });
+
       res.writeHead(400); // bad request
       return void res.end();
     }
     const contentType = mimeTypes.lookup(path.extname(safePathname)) || 'binary/octet-stream';
-    if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType })) return; // handled by static handler
+    if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType, client })) return; // handled by static handler
     const pathParts = safePathname.split('/');
     const storageId = pathParts[1];
     if (!storageId) { // root is healthcheck
@@ -43,7 +43,7 @@ module.exports = (argv, config) => {
     try {
       storage = client.getStorage(storageId);
     } catch (ex) {
-      console.warn(chalk.yellow(ex.stack || ex));
+      client.emit('warn', { message: 'Storage exception', stack: ex.stack || ex });
 
       res.statusMessage = 'Invalid storage';
       res.statusCode = 404;
@@ -73,14 +73,14 @@ module.exports = (argv, config) => {
           else await deleteFile(opts);
           break;
         default:
-          console.error(chalk.red(`Unsupported req.method ${req.method}`));
+          client.emit('warn', { status: 404, message: `Unsupported req.method ${req.method}` });
           res.writeHead(404);
           res.end();
           break;
       }
     } catch (err) {
       const status = err.statusCode || 500;
-      console.error(chalk[status >= 500 ? 'red' : 'yellow'](`Error ${status}:`, err.stack || err));
+      client.emit(status >= 500 ? 'error' : 'warn', { status: status, message: `Error ${status}`, stack: err.stack || err });
       res.statusCode = status;
       return void res.end();
     }

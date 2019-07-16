@@ -1,6 +1,6 @@
 {
   "name": "blobby",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "description": "An HTTP Proxy for Blob storage systems (such as S3) that automatically shards and replicates your data",
   "main": "./src",
   "scripts": {
@@ -30,7 +30,7 @@
   "dependencies": {
     "agentkeepalive": "^4.0.0",
     "async": "^2.6.1",
-    "blobby-client": "^1.0.4",
+    "blobby-client": "^1.1.0",
     "bytes": "^2.5.0",
     "chalk": "^1.1.3",
     "config-shield": "^0.2.0",

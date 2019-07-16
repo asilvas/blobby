@@ -39,11 +39,11 @@ function getCompiledTests(argv, staticFiles) {
 }
 
 function processFile(test, filename, opts) {
-  const { headers, res, urlInfo, contentType } = opts;
+  const { headers, res, urlInfo, contentType, client } = opts;
 
   getFileData(test, filename, (err, headers, data) => {
     if (err) {
-      console.error('Static route error:', urlInfo.pathname, err.stack);
+      client.emit('error', { status: 404, message: `Static route error: ${urlInfo.pathname}`, stack: err.stack || err });
       res.statusCode = 404;
       return void res.end();
     }

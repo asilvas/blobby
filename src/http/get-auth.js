@@ -3,7 +3,7 @@ const path = require('path');
 const gAuthDrivers = {};
 
 module.exports = opts => {
-  const { config, storage, req, fileKey } = opts;
+  const { config, storage, req, fileKey, client } = opts;
   if (!config.auth) return; // auth config not avail
 
   const authId = storage.config.auth;
@@ -20,7 +20,7 @@ module.exports = opts => {
     ;
     const mod = require(absPath);
     driver = mod.default || mod; // support ES Modules & CommonJS
-    if (!driver) return console.error(`Unable to load auth driver ${authConfig.driver}`); // no driver detected
+    if (!driver) return void client.emit('error', { message: `Unable to load auth driver ${authConfig.driver}` });
     gAuthDrivers[configAuthId] = driver; // cache
   }
 

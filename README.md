@@ -117,6 +117,9 @@ blobby server --config-dir lib/config
 | auth.{id}.driver | string | (required) | Path of the driver to load, ala `blobby-auth-header` |
 | auth.{id}.options | Object | (optional) | Any options to pass to the auth driver |
 | auth.{id}.publicReads | Boolean | `true` | Set to false if GET's also require auth |
+| log | LogOptions | (optional) | Options based on `EventEmitter` |
+| log.warnings | bool | `true` | Log warnings to `console.warn` automatically. You can subscribe to `client.on('warn')`  if you prefer |
+| log.errors | bool | `true` | Log warnings to `console.error` automatically. You can subscribe to `client.on('error')`  if you prefer |
 
 
 ### Storage Drivers
