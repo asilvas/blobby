@@ -54,7 +54,7 @@ module.exports = (argv, config) => {
     let decodedFileKey;
     try {
       decodedFileKey = fileKey.split('/').map(decodeURIComponent).join('/');
-    } catch (e) {
+    } catch (ex /* ignore */) {
       decodedFileKey = fileKey;
     }
     const opts = { isAuthorized: true, argv, config, client, storage, fileKey: decodedFileKey, urlInfo, req, res, contentType, headers: req.headers || req.getAllHeaders() };
