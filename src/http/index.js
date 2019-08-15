@@ -51,7 +51,13 @@ module.exports = (argv, config) => {
     }
 
     const fileKey = pathParts.slice(2).join('/');
-    const opts = { isAuthorized: true, argv, config, client, storage, fileKey, urlInfo, req, res, contentType, headers: req.headers || req.getAllHeaders() };
+    let decodedFileKey;
+    try {
+      decodedFileKey = fileKey.split('/').map(decodeURIComponent).join('/');
+    } catch (e) {
+      decodedFileKey = fileKey;
+    }
+    const opts = { isAuthorized: true, argv, config, client, storage, fileKey: decodedFileKey, urlInfo, req, res, contentType, headers: req.headers || req.getAllHeaders() };
     try {
       const auth = getAuthHandler(opts);
       if (auth) {
