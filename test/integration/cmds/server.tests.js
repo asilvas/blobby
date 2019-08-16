@@ -104,6 +104,19 @@ describe('# src/cmds/server.js', async () => {
     expect(readFileSync('test/fs/local1/tmp/test1.txt', 'utf8')).to.equal('source');
   });
 
+  it('PUT (COPY) tmp1/filename+with+plus.txt to tmp2/filename+with+plus.txt', async () => {
+    writeFileSync('test/fs/local1/tmp1/filename+with+plus.txt', 'source');
+    expect(existsSync('test/fs/local1/tmp2/filename+with+plus.txt')).to.be.false;
+    const { data, status, headers } = await axios.put(`http://localhost:4080/local/tmp2/${encodeURIComponent('filename+with+plus')}.txt`, '', {
+      headers: { ...mocks.authHeaders, 'x-amz-copy-source': `local:tmp1/${encodeURIComponent('filename+with+plus')}.txt`, ETag: '123' }
+    });
+    expect(status).to.equal(204);
+    expect(headers.etag).to.not.equal('123');
+    expect(headers['content-type']).to.equal('text/plain');
+    expect(existsSync('test/fs/local1/tmp2/filename+with+plus.txt')).to.be.true;
+    expect(readFileSync('test/fs/local1/tmp2/filename+with+plus.txt', 'utf8')).to.equal('source');
+  });
+
   it('PUT test1.txt (w/o) is restricted', async () => {
     expect(existsSync('test/fs/local1/tmp/test1.txt')).to.be.false;
     const { status } = await axios.put('http://localhost:4080/local/tmp/test1.txt', 'test1', {
