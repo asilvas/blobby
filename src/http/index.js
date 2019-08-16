@@ -21,7 +21,7 @@ module.exports = (argv, config) => {
     const urlInfo = url.parse(req.url, true, true);
     let safePathname;
     try {
-      safePathname = decodeURI(urlInfo.pathname);
+      safePathname = urlInfo.pathname.split('/').map(decodeURIComponent).join('/');
     } catch (ex) {
       client.emit('error', { message: `Cannot decodeURI ${urlInfo.pathname}`, stack: ex.stack || ex });
 
@@ -51,13 +51,7 @@ module.exports = (argv, config) => {
     }
 
     const fileKey = pathParts.slice(2).join('/');
-    let decodedFileKey;
-    try {
-      decodedFileKey = fileKey.split('/').map(decodeURIComponent).join('/');
-    } catch (ex /* ignore */) {
-      decodedFileKey = fileKey;
-    }
-    const opts = { isAuthorized: true, argv, config, client, storage, fileKey: decodedFileKey, urlInfo, req, res, contentType, headers: req.headers || req.getAllHeaders() };
+    const opts = { isAuthorized: true, argv, config, client, storage, fileKey, urlInfo, req, res, contentType, headers: req.headers || req.getAllHeaders() };
     try {
       const auth = getAuthHandler(opts);
       if (auth) {
