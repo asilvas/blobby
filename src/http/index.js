@@ -21,7 +21,7 @@ module.exports = (argv, config) => {
     const urlInfo = url.parse(req.url, true, true);
     let safePathname;
     try {
-      safePathname = urlInfo.pathname.split('/').map(decodeURIComponent).join('/');
+      safePathname = decodeURI(urlInfo.pathname).split('/').map(decodeURIComponent).join('/');
     } catch (ex) {
       client.emit('error', { message: `Cannot decodeURI ${urlInfo.pathname}`, stack: ex.stack || ex });
 
