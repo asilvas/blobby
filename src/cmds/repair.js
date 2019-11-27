@@ -95,7 +95,7 @@ function compare({ argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo 
     });
   };
 
-  srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000 }, compareFiles);
+  srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: argv.resumeKey }, compareFiles);
 }
 
 function getCompareFileTask({ file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo }) {

@@ -71,6 +71,10 @@ yargs
     default: false,
     type: 'boolean'
   })
+  .option('resume-key', {
+    describe: 'If a previous command was stopped you can resume from where you left off with this option',
+    type: 'string'
+  })
   .option('retry-min', {
     describe: 'Minimum timeout (in ms) for first retry, where retries are applicable',
     default: 1000,

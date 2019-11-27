@@ -82,7 +82,7 @@ function task({ argv, srcConfig, srcStorage, statInfo }, cb) {
     });
   };
 
-  srcStorage.list(argv.dir, { deepQuery: argv.recursive, maxKeys: 5000 }, nextFiles);
+  srcStorage.list(argv.dir, { deepQuery: argv.recursive, maxKeys: 5000, lastKey: argv.resumeKey }, nextFiles);
 }
 
 function getFileTask(file, acl, storage, statInfo) {

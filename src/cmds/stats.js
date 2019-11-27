@@ -92,5 +92,5 @@ function task({ argv, srcConfig, srcStorage, statInfo }, cb) {
     srcStorage.list('', { deepQuery: argv.recursive, maxKeys: 5000, lastKey }, compareFiles);
   };
 
-  srcStorage.list('', { deepQuery: argv.recursive, maxKeys: 5000 }, compareFiles);
+  srcStorage.list('', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: argv.resumeKey }, compareFiles);
 }
