@@ -81,7 +81,11 @@ function task({ argv, srcConfig, srcStorage, statInfo }, cb) {
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
     gLastKey = lastKey;
-    files.forEach(f => {
+    const dateMin = argv.dateMin && new Date(argv.dateMin);
+    const dateMax = argv.dateMax && new Date(argv.dateMax);
+    files.filter(f => {
+      return (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
+    }).forEach(f => {
       statInfo.match(f);
     });
 

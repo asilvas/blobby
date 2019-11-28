@@ -67,6 +67,9 @@ JSON, [JSON5](http://json5.org/), CommonJS, and
 | mode | string | `"headers"` | Used when comparing files. For usage see [Compare Modes](#compare-modes) |
 | recursive | boolean | `true` | Enable deep query (recursive subdirectories) for operations that support it |
 | removeGhosts | boolean | `false` | For `repair`'s if `true`, will remove missing file instances instead of copying to missing storage |
+| resume-key | string | none | If a previous command was stopped you can resume from where you left off with this option |
+| date-min | string | none | Minimum date required when processing records, all others are ignored |
+| date-max | string | none | Maximum date required when processing records, all others are ignored |
 | retry-min | number | `1000` | Minimum timeout (in ms) for first retry, where retries are applicable |
 | retry-factor | number | `2` | Multiple in time applied to retry attempts, where retries are applicable |
 | retry-attempts | number | `3` | Maximum retry attempts before failure is reported, where retries are applicable |

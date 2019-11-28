@@ -69,7 +69,11 @@ function task({ argv, srcConfig, srcStorage, statInfo }, cb) {
   const nextFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
     gLastKey = lastKey;
-    const fileTasks = files.map(f => getFileTask(f, argv.acl, srcStorage, statInfo));
+    const dateMin = argv.dateMin && new Date(argv.dateMin);
+    const dateMax = argv.dateMax && new Date(argv.dateMax);
+    const fileTasks = files.filter(f => {
+      return (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
+    }).map(f => getFileTask(f, argv.acl, srcStorage, statInfo));
 
     async.parallelLimit(fileTasks, argv.concurrency || 20, (err) => {
       if (err) return void cb(err);

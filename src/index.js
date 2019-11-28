@@ -75,6 +75,14 @@ yargs
     describe: 'If a previous command was stopped you can resume from where you left off with this option',
     type: 'string'
   })
+  .option('date-min', {
+    describe: 'Minimum date required when processing records, all others are ignored',
+    type: 'string'
+  })
+  .option('date-max', {
+    describe: 'Maximum date required when processing records, all others are ignored',
+    type: 'string'
+  })
   .option('retry-min', {
     describe: 'Minimum timeout (in ms) for first retry, where retries are applicable',
     default: 1000,

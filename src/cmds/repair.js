@@ -80,7 +80,11 @@ function compare({ argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo 
   const compareFiles = (err, files, dirs, lastKey) => {
     if (err) return void cb(err);
     gLastKey = lastKey;
-    const compareFileTasks = files.map(f => {
+    const dateMin = argv.dateMin && new Date(argv.dateMin);
+    const dateMax = argv.dateMax && new Date(argv.dateMax);
+    const compareFileTasks = files.filter(f => {
+      return (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
+    }).map(f => {
       return getCompareFileTask({ file: f, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo });
     });
 
