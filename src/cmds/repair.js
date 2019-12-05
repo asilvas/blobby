@@ -5,6 +5,7 @@ const Stats = require('../stats');
 const shouldExecuteTask = require('./util/should-execute-task');
 const getConfigStoragePairs = require('./util/get-config-storage-pairs');
 const retry = require('../util/retry');
+const getFiles = require('./util/get-files');
 
 let gLastKey = '';
 
@@ -40,66 +41,64 @@ module.exports = {
     const statsTimer = setInterval(() => argv.logger.log(`LastKey: ${gLastKey}\n${!argv.silent && stats.toString()}\nRepairing...`), 5000);
     statsTimer.unref();
 
-    return new Promise(resolve => {
-      // process all comparisons
+    // process all comparisons
+    await new Promise((resolve, reject) => {
       async.series(compareTasks, (err, results) => {
-        clearInterval(statsTimer);
-        !argv.silent && argv.logger.log(stats.toString());
+        if (err) return void reject(err);
 
-        if (err) {
-          argv.logger.error('File repair has failed, aborting...', err.stack || err);
-        } else {
-          argv.logger.log('Repair complete');
-        }
-
-        resolve();
+        resolve(results);
       });
     });
+
+    clearInterval(statsTimer);
+    !argv.silent && argv.logger.log(stats.toString());
+
+    argv.logger.log('Repair complete');
   }
 };
 
 function getCompareTask(argv, src, dst, stats) {
   const statInfo = stats.getStats(src.config, src.storage, dst.config, dst.storage);
 
-  return cb => {
+  return async () => {
     statInfo.running();
-    compare({ argv, srcConfig: src.config, srcStorage: src.storage, dstConfig: dst.config, dstStorage: dst.storage, statInfo }, (err) => {
+
+    try {
+      await compare({ argv, srcConfig: src.config, srcStorage: src.storage, dstConfig: dst.config, dstStorage: dst.storage, statInfo });
+
       statInfo.complete();
-
-      if (err) {
-        argv.logger.error('Repair failure:', err.stack || err); // log only, do not abort repair
-      }
-
-      cb();
-    });
-  };
+    } catch (err) {
+      argv.logger.error('Repair failure:', err.stack || err); // log only, do not abort repair
+    }
+  }
 }
 
-function compare({ argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo }, cb) {
-  const { dir } = argv;
-  const compareFiles = (err, files, dirs, lastKey) => {
-    if (err) return void cb(err);
+async function compare(options) {
+  const nextFiles = getFiles(options);
+  const { argv } = options;
+
+  let ret;
+  do {
+    ret = await nextFiles();
+    if (!ret) {
+      console.log('no more files to process')
+      break;
+    }
+
+    const { files, lastKey } = ret;
     gLastKey = lastKey;
-    const dateMin = argv.dateMin && new Date(argv.dateMin);
-    const dateMax = argv.dateMax && new Date(argv.dateMax);
-    const compareFileTasks = files.filter(f => {
-      return (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
-    }).map(f => {
-      return getCompareFileTask({ file: f, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo });
+    const tasks = files.map(f => {
+      return getCompareFileTask({ file: f, ...options });
     });
 
-    async.parallelLimit(compareFileTasks, argv.concurrency || 20, (err) => {
-      if (err) return void cb(err);
+    await new Promise((resolve, reject) => {
+      async.parallelLimit(tasks, argv.concurrency || 20, err => {
+        if (err) return void reject(err);
 
-      if (!lastKey) { // we're done, no more files to compare
-        return void cb();
-      }
-
-      srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey }, compareFiles);
+        resolve();
+      });
     });
-  };
-
-  srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: argv.resumeKey }, compareFiles);
+  } while (ret.lastKey);
 }
 
 function getCompareFileTask({ file, argv, srcConfig, srcStorage, dstConfig, dstStorage, statInfo }) {
