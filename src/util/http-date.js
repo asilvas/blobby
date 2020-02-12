@@ -1,11 +1,3 @@
-const dayNames = [
-  'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-];
-const monthNames = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-];
-
 /**
  * Formats a `Date` object according to RFC 7231 (used for Last-Modified header)
  *
@@ -13,13 +5,7 @@ const monthNames = [
  * @returns {String}  - The formatted string
  */
 function formatDate(dt) {
-  const day = dayNames[dt.getUTCDay()];
-  const month = monthNames[dt.getUTCMonth()];
-  const date = `${day}, ${dt.getUTCDate()} ${month} ${dt.getUTCFullYear()}`;
-  const time = [dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds()]
-    .map(zeroPad2)
-    .join(':');
-  return `${date} ${time} GMT`;
+  return dt.toUTCString();
 }
 
 /**
