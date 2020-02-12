@@ -1,4 +1,5 @@
 const path = require('path');
+const { formatDate } = require('../util/http-date');
 
 module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
   // always available
@@ -8,7 +9,7 @@ module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, co
     res.setHeader('ETag', headers.ETag);
   }
   if (headers.LastModified) {
-    res.setHeader('Last-Modified', headers.LastModified);
+    res.setHeader('Last-Modified', formatDate(headers.LastModified));
   }
   if (headers.CacheControl) { // object caching takes priority
     res.setHeader('Cache-Control', headers.CacheControl);

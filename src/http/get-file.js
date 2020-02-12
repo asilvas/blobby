@@ -1,5 +1,6 @@
 const setHeaders = require('./set-headers');
 const compressFile = require('./compress-file');
+const { parseDate } = require('../util/http-date');
 
 module.exports = async opts => {
   const { client, storage, fileKey, res, contentType, isAuthorized } = opts;
@@ -19,7 +20,7 @@ module.exports = async opts => {
 
   // if etag or last-modified suffice, respond with 304
   const isMatch = (opts.headers['if-none-match'] && headers.ETag && opts.headers['if-none-match'] === headers.ETag) ||
-    (opts.headers['if-last-modified'] && headers.LastModified && new Date(opts.headers['if-last-modified']) >= headers.LastModified)
+    (opts.headers['if-last-modified'] && headers.LastModified && parseDate(opts.headers['if-last-modified']) >= headers.LastModified)
   ;
 
   opts.headers = headers;
