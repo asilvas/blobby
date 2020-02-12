@@ -22,8 +22,4 @@ function parseDate(str) {
   return new Date(str);
 }
 
-function zeroPad2(num) {
-  return `0${num}`.substr(-2);
-}
-
 module.exports = { formatDate, parseDate };
