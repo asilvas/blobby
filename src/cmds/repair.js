@@ -70,7 +70,7 @@ function getCompareTask(argv, src, dst, stats) {
     } catch (err) {
       argv.logger.error('Repair failure:', err.stack || err); // log only, do not abort repair
     }
-  }
+  };
 }
 
 async function compare(options) {
@@ -81,7 +81,7 @@ async function compare(options) {
   do {
     ret = await nextFiles();
     if (!ret) {
-      console.log('no more files to process')
+      console.log('no more files to process');
       break;
     }
 

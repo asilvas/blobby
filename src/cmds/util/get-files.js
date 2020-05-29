@@ -1,8 +1,7 @@
-let gIsRunning = false;
-
-let gPreviousKey = '';
-let gLastKey = '';
-let gFiles = [];
+let gIsRunning;
+let gPreviousKey;
+let gLastKey;
+let gFiles;
 let gNextFiles;
 let gResolve;
 let gReject;
@@ -17,7 +16,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
 
     gIsRunning = true;
 
-    srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: gLastKey || argv.resumeKey }, processFiles);    
+    srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: gLastKey || argv.resumeKey }, processFiles);
   }
 
   function processFiles(err, files, dirs, lastKey) {
@@ -47,7 +46,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
 
   pullMoreFiles();
 
-  const getNextFiles = function() {
+  const getNextFiles = function () {
     let files, lastKey;
     if (gNextFiles) {
       if (gFiles.length) { // if data avail, auto-resolve
@@ -55,7 +54,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
         lastKey = gPreviousKey; // return the previous key so caller does not resume before the results were processed
         gFiles = []; // reset
         gPreviousKey = gLastKey; // reset
-    
+
         pullMoreFiles();
 
         gNextFiles = null; // reset
@@ -93,7 +92,21 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
       lastKey,
       files
     });
-  }
+  };
 
   return getNextFiles;
+};
+
+// hack for tests that share instance...
+module.exports.reset = function() {
+  gIsRunning = false;
+
+  gPreviousKey = '';
+  gLastKey = '';
+  gFiles = [];
+  gNextFiles = undefined;
+  gResolve = undefined;
+  gReject = undefined;
 }
+
+module.exports.reset();
