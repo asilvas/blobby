@@ -4,6 +4,8 @@ const Stats = require('../stats');
 const async = require('async');
 const shouldExecuteTask = require('./util/should-execute-task');
 const getConfigStoragePairs = require('./util/get-config-storage-pairs');
+const readStatsFile = require('./util/read-stats-file');
+const writeStatsFile = require('./util/write-stats-file');
 
 let gLastKey = '';
 
@@ -21,6 +23,11 @@ module.exports = {
 
     const stats = new Stats();
 
+    if (argv.statsFile && !argv.resumeKey) {
+      const info = readStatsFile(argv.statsFile);
+      argv.resumeKey = info.lastKey || '';
+    }
+
     const compareTasks = [];
     const configs = await getConfigs(argv);
 
@@ -35,7 +42,10 @@ module.exports = {
 
     if (compareTasks.length === 0) return void argv.logger.error('No comparison tasks detected, see help');
 
-    const statsTimer = setInterval(() => argv.logger.log(`LastKey: ${gLastKey}\n${!argv.silent && stats.toString()}\nComparing...`), 5000);
+    const statsTimer = setInterval(() => {
+      argv.logger.log(`LastKey: ${gLastKey}\n${(!argv.silent && stats.toString() + '\n') || ''}Comparing...`);
+      argv.statsFile && writeStatsFile(argv.statsFile, stats.toJSON());
+    }, 5000);
     statsTimer.unref();
 
     // process all comparisons
@@ -43,6 +53,7 @@ module.exports = {
       async.series(compareTasks, (err, results) => {
         clearInterval(statsTimer);
         !argv.silent && argv.logger.log(stats.toString());
+        argv.statsFile && writeStatsFile(argv.statsFile, stats.toJSON());
 
         if (err) {
           argv.logger.error('File comparison has failed, aborting...', err);

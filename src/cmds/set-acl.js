@@ -2,6 +2,8 @@ const BlobbyClient = require('blobby-client');
 const Stats = require('../stats');
 const async = require('async');
 const getConfigStoragePairs = require('./util/get-config-storage-pairs');
+const readStatsFile = require('./util/read-stats-file');
+const writeStatsFile = require('./util/write-stats-file');
 
 let gLastKey = '';
 
@@ -23,6 +25,11 @@ module.exports = {
 
     const stats = new Stats();
 
+    if (argv.statsFile && !argv.resumeKey) {
+      const info = readStatsFile(argv.statsFile);
+      argv.resumeKey = info.lastKey || '';
+    }
+
     const tasks = [];
     const configs = await BlobbyClient.getConfigs(argv);
 
@@ -33,7 +40,10 @@ module.exports = {
 
     if (tasks.length === 0) return void argv.logger.error('No tasks detected, see help');
 
-    const statsTimer = setInterval(() => argv.logger.log(`LastKey: ${gLastKey}\n${!argv.silent && stats.toString()}\nApplying ACL's...`), 5000);
+    const statsTimer = setInterval(() => {
+      argv.logger.log(`LastKey: ${gLastKey}\n${(!argv.silent && stats.toString() + '\n') || ''}Applying ACL's...`);
+      argv.statsFile && writeStatsFile(argv.statsFile, stats.toJSON());
+    }, 5000);
     statsTimer.unref();
 
     return new Promise(resolve => {
@@ -41,6 +51,7 @@ module.exports = {
       async.series(tasks, (err, results) => {
         clearInterval(statsTimer);
         !argv.silent && argv.logger.log(stats.toString());
+        argv.statsFile && writeStatsFile(argv.statsFile, stats.toJSON());
 
         if (err) {
           argv.logger.error('ACL\'s has failed, aborting...', err);

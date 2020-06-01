@@ -12,6 +12,7 @@ class StatInfo {
     this.dstStorage = dstStorage;
     this.info = {
       state: 'initialized',
+      lastKey: null,
       srcFiles: 0,
       matches: 0,
       matchSize: 0,
@@ -58,6 +59,19 @@ class StatInfo {
     this.info.state = 'complete';
   }
 
+  toJSON() {
+    return {
+      lastKey: this.info.lastKey,
+      srcFiles: this.info.srcFiles,
+      matches: this.info.matches,
+      matchSize: this.info.matchSize,
+      diffCount: this.info.diffCount,
+      diffSize: this.info.diffSize,
+      repairs: this.info.repairs,
+      errorCount: this.info.errorCount
+    }
+  }
+
   static generateId(srcConfig, srcStorage, dstConfig, dstStorage) {
     return `${srcConfig.id}.${srcStorage.id}.${dstConfig.id}.${dstStorage.id}`;
   }
@@ -69,6 +83,15 @@ module.exports = class Stats {
     this.storageIds = {};
     this.storages = {};
     this.stats = {};
+  }
+
+  toJSON() {
+    return Object.keys(this.stats).reduce((stats, key) => {
+      const s = this.stats[key].toJSON();
+      stats[key] = s;
+      if (s.lastKey) stats.lastKey = s.lastKey;
+      return stats;
+    }, {});
   }
 
   getStats(srcConfig, srcStorage, dstConfig, dstStorage) {

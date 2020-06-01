@@ -108,6 +108,10 @@ yargs
     default: false,
     type: 'boolean'
   })
+  .option('statsFile', {
+    describe: 'Location of stats file, including resumeKey that can be used for continuing where you left off',
+    type: 'string'
+  })
   .demandCommand()
   .help()
   .epilogue(`Blobby v${pkg.version}`)

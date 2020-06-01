@@ -16,7 +16,8 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
 
     gIsRunning = true;
 
-    srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: gLastKey || argv.resumeKey }, processFiles);
+    const lastKey = statInfo.info.lastKey = gLastKey || argv.resumeKey;
+    srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: lastKey }, processFiles);
   }
 
   function processFiles(err, files, dirs, lastKey) {
@@ -51,7 +52,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
     if (gNextFiles) {
       if (gFiles.length) { // if data avail, auto-resolve
         files = gFiles;
-        lastKey = gPreviousKey; // return the previous key so caller does not resume before the results were processed
+        statInfo.info.lastKey = lastKey = gPreviousKey; // return the previous key so caller does not resume before the results were processed
         gFiles = []; // reset
         gPreviousKey = gLastKey; // reset
 
@@ -82,7 +83,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
     }
 
     files = gFiles;
-    lastKey = gPreviousKey; // return the previous key so caller does not resume before the results were processed
+    statInfo.info.lastKey = lastKey = gPreviousKey; // return the previous key so caller does not resume before the results were processed
     gFiles = []; // reset
     gPreviousKey = gLastKey; // reset
 
