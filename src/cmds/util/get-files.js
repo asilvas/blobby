@@ -29,7 +29,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
       // first key is only set once per capture
       gPreviousKey = lastKey;
     }
-    gLastKey = lastKey;
+    statInfo.info.lastKey = gLastKey = lastKey;
 
     const filteredFiles = files.filter(f => {
       return (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
@@ -99,7 +99,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
 };
 
 // hack for tests that share instance...
-module.exports.reset = function() {
+module.exports.reset = function () {
   gIsRunning = false;
 
   gPreviousKey = '';
@@ -108,6 +108,6 @@ module.exports.reset = function() {
   gNextFiles = undefined;
   gResolve = undefined;
   gReject = undefined;
-}
+};
 
 module.exports.reset();

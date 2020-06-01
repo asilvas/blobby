@@ -69,7 +69,7 @@ class StatInfo {
       diffSize: this.info.diffSize,
       repairs: this.info.repairs,
       errorCount: this.info.errorCount
-    }
+    };
   }
 
   static generateId(srcConfig, srcStorage, dstConfig, dstStorage) {

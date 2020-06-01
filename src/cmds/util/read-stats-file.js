@@ -8,4 +8,4 @@ module.exports = function readStatsFile(filePath) {
   }
 
   return {};
-}
+};
