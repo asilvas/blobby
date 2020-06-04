@@ -23,9 +23,9 @@ module.exports = {
 
     const stats = new Stats();
 
-    if (argv.statsFile && !argv.resumeKey) {
+    if (argv.statsFile) {
       const info = readStatsFile(argv.statsFile);
-      argv.resumeKey = info.lastKey || '';
+      argv.resumeKey = info.lastKey || argv.resumeKey || '';
     }
 
     const compareTasks = [];
