@@ -1,6 +1,6 @@
 {
   "name": "blobby",
-  "version": "0.19.2",
+  "version": "0.20.0",
   "description": "An HTTP Proxy for Blob storage systems (such as S3) that automatically shards and replicates your data",
   "main": "./src",
   "scripts": {
