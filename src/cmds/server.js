@@ -9,6 +9,12 @@ const Agent = require('agentkeepalive');
 const HttpsAgent = Agent.HttpsAgent;
 const fs = require('fs');
 
+let handleResolve, handleReject;
+global.blobbyServer = new Promise((resolve, reject) => {
+  handleResolve = resolve;
+  handleReject = reject;
+});
+
 module.exports = {
   command: 'server',
   desc: 'Start HTTP API Server',
@@ -36,18 +42,18 @@ module.exports = {
 
     const serverTasks = httpConfigs.map(httpConfig => createServerTask(argv, config, httpConfig));
 
-    return new Promise(resolve => {
-      async.series(serverTasks, (err, servers) => {
-        if (err) {
-          console.error('Failed to start server successfully');
-          console.error(err.stack || err);
-          console.error('Shutting down...');
-          process.exit();
-        }
+    async.series(serverTasks, (err, servers) => {
+      if (err) {
+        console.error('Failed to start server successfully');
+        console.error(err.stack || err);
+        console.error('Shutting down...');
+        process.exit();
+      }
 
-        resolve(servers);
-      });
+      handleResolve(servers);
     });
+
+    return global.blobbyServer;
   }
 };
 
