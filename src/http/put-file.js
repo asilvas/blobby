@@ -19,7 +19,7 @@ module.exports = async opts => {
     setHeaders(opts);
     res.end();
   } catch (ex) {
-    err = new Error(`PUT ${storage.id}/${fileKey} failed with ${ex.statusCode}, err: ${ex.message || ex}`);
+    err = new Error(`PUT ${storage.id}/${fileKey} failed with ${ex.statusCode}, err: ${ex.stack || ex}`);
     err.statusCode = ex.statusCode || 400;
     throw err;
   }

@@ -16,7 +16,7 @@ module.exports = async opts => {
     res.statusCode = 204; // no body for successful deletes
     res.end();
   } catch (ex) {
-    err = new Error(`DELETE ${storage.id}/${fileKey} failed with ${ex.statusCode}, err: ${ex.message || ex}`);
+    err = new Error(`DELETE ${storage.id}/${fileKey} failed with ${ex.statusCode}, err: ${ex.stack || ex}`);
     err.statusCode = ex.statusCode || 404; // default to not found if none provided
     throw err;
   }
