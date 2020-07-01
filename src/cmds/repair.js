@@ -28,6 +28,9 @@ module.exports = {
     if (argv.statsFile) {
       const info = readStatsFile(argv.statsFile);
       argv.resumeKey = info.lastKey || argv.resumeKey || '';
+      argv.maxKey = info.maxKey || argv.maxKey || '';
+      info.lastKey = argv.resumeKey;
+      info.maxKey = argv.maxKey;
     }
 
     const compareTasks = [];

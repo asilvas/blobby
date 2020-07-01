@@ -75,6 +75,10 @@ yargs
     describe: 'If a previous command was stopped you can resume from where you left off with this option',
     type: 'string'
   })
+  .option('max-key', {
+    describe: 'A key not to exceed when processing a command',
+    type: 'string'
+  })
   .option('date-min', {
     describe: 'Minimum date required when processing records, all others are ignored',
     type: 'string'

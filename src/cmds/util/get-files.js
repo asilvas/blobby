@@ -14,9 +14,14 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
   function pullMoreFiles() {
     if (gIsRunning || gFiles.length >= 5000 || gLastKey === null) return; // do not queue more than 5k files at a time
 
+    const lastKey = statInfo.info.lastKey = gLastKey || argv.resumeKey;
+    if (argv.maxKey && lastKey >= argv.maxKey) {
+      gLastKey = null; // job complete
+      return;
+    }
+
     gIsRunning = true;
 
-    const lastKey = statInfo.info.lastKey = gLastKey || argv.resumeKey;
     srcStorage.list(dir || '', { deepQuery: argv.recursive, maxKeys: 5000, lastKey: lastKey }, processFiles);
   }
 
@@ -32,7 +37,10 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
     statInfo.info.lastKey = gLastKey = lastKey;
 
     const filteredFiles = files.filter(f => {
-      return (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
+      const modifiedCheck = (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
+      const maxKeyCheck = !argv.maxKey || f.Key < argv.maxKey;
+
+      return modifiedCheck && maxKeyCheck; // only process file if all checks pass
     });
 
     gFiles = gFiles.concat(filteredFiles);
