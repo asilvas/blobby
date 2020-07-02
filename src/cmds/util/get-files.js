@@ -36,12 +36,7 @@ module.exports = function getFiles({ argv, srcConfig, srcStorage, dstConfig, dst
     }
     statInfo.info.lastKey = gLastKey = lastKey;
 
-    const filteredFiles = files.filter(f => {
-      const modifiedCheck = (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax);
-      const maxKeyCheck = !argv.maxKey || f.Key < argv.maxKey;
-
-      return modifiedCheck && maxKeyCheck; // only process file if all checks pass
-    });
+    const filteredFiles = files.filter(f => (!dateMin || f.LastModified >= dateMin) && (!dateMax || f.LastModified <= dateMax));
 
     gFiles = gFiles.concat(filteredFiles);
 
