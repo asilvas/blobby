@@ -1,7 +1,7 @@
 const zlib = require('zlib');
 
-module.exports = ({ res, realContentType, headers, data }) => {
-  const accept = headers['accept-encoding'] || '';
+module.exports = ({ req, res, realContentType, headers, data }) => {
+  const accept = req.headers['accept-encoding'] || '';
   if (!/gzip/i.test(accept)) {
     // all browsers support gzip, use it or nothing at all
     return false;
