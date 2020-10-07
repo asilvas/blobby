@@ -10,15 +10,24 @@ module.exports = ({ req, res, realContentType, headers, data }) => {
   ;
   if (!shouldCompress) return false;
 
-  let compressor, contentEncoding;
+  let compressor, compressorOpts, contentEncoding;
   if (supportBrotli) {
     compressor = zlib.brotliCompress;
     contentEncoding = 'br';
+    compressorOpts = {
+      chunkSize: 32 * 1024,
+      params: {
+        [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+        [zlib.constants.BROTLI_PARAM_QUALITY]: 4,
+        [zlib.constants.BROTLI_PARAM_SIZE_HINT]: data.length
+      }
+    }
   } else {
     compressor = zlib.gzip;
     contentEncoding = 'gzip';
+    compressorOpts = null;
   }
-  compressor(data, function (err, compressBuffer) {
+  compressor(data, compressorOpts, function (err, compressBuffer) {
     if (err) {
       // if compression fails, log it and move on. no need to fail request
       return void res.end(data);
