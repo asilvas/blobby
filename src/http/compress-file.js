@@ -15,10 +15,9 @@ module.exports = ({ req, res, realContentType, headers, data }) => {
     compressor = zlib.brotliCompress;
     contentEncoding = 'br';
     compressorOpts = {
-      chunkSize: 32 * 1024,
       params: {
         [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
-        [zlib.constants.BROTLI_PARAM_QUALITY]: 4,
+        [zlib.constants.BROTLI_PARAM_QUALITY]: 5,
         [zlib.constants.BROTLI_PARAM_SIZE_HINT]: data.length
       }
     }
