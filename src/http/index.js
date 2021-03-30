@@ -14,9 +14,9 @@ const BlobbyClient = require('blobby-client');
 module.exports = (argv, config) => {
   const client = new BlobbyClient(argv, config);
 
-  if (typeof config.logger === 'function') {
-    client.on('warn', msg => logger.warn(msg));
-    client.on('error', msg => logger.error(msg));
+  if (typeof config.logger === 'object') {
+    client.on('warn', msg => config.logger.warn(msg));
+    client.on('error', msg => config.logger.error(msg));
   }
 
   return async (req, res) => {
