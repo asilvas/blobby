@@ -4,7 +4,7 @@ module.exports = ({ req, res, realContentType, headers, data }) => {
   const accept = req.headers['accept-encoding'] || '';
   const supportGzip = /\bgzip\b/.test(accept);
   const supportBrotli = /\bbr\b/.test(accept);
-  const shouldCompress = 
+  const shouldCompress =
     (supportGzip || supportBrotli)
     && !/^image|^binary/i.test(realContentType) && headers.Size >= 200 // gzipping below this size can make files bigger
   ;
@@ -20,7 +20,7 @@ module.exports = ({ req, res, realContentType, headers, data }) => {
         [zlib.constants.BROTLI_PARAM_QUALITY]: 5,
         [zlib.constants.BROTLI_PARAM_SIZE_HINT]: data.length
       }
-    }
+    };
   } else {
     compressor = zlib.gzip;
     contentEncoding = 'gzip';

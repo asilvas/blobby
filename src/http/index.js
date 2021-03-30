@@ -12,7 +12,7 @@ const getAuthHandler = require('./get-auth');
 const BlobbyClient = require('blobby-client');
 
 module.exports = (argv, config) => {
-  const client = new BlobbyClient(argv, config);
+  const client = global.blobbyClient = new BlobbyClient(argv, config);
 
   return async (req, res) => {
     if (typeof config.httpHandler === 'function') {
