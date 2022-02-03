@@ -1,6 +1,7 @@
 {
   "extends": "godaddy",
   "rules": {
+    "eqeqeq": 0,
     "strict": 0,
     "no-sync": 0,
     "no-unused-vars": 0,

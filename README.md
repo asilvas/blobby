@@ -110,7 +110,7 @@ blobby server --config-dir lib/config
 | retry.min | number | `500` | Minimum timeout (in ms) for first retry |
 | retry.factor | number | `2` | Multiple in time applied to retry attempts |
 | retry.retries | number | `3` | Maximum retry attempts before failure is reported |
-| cors | CorsOptions | (optional) | CORS accessed is enabled by default, for `GET`'s only |
+| cors | CorsOptions | (optional) | CORS access is enabled by default, for `GET`'s only |
 | cors.access-control-allow-credentials | string | `true` | Allow credentials |
 | cors.access-control-allow-headers | string | `*` | Allow headers |
 | cors.access-control-allow-methods | string | `GET` | Allow methods |

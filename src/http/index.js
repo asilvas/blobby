@@ -9,6 +9,7 @@ const putFile = require('./put-file');
 const deleteFile = require('./delete-file');
 const deleteFiles = require('./delete-files');
 const getAuthHandler = require('./get-auth');
+const getOptions = require('./options');
 const BlobbyClient = require('blobby-client');
 
 module.exports = (argv, config) => {
@@ -76,6 +77,9 @@ module.exports = (argv, config) => {
         case 'DELETE':
           if (pathParts[pathParts.length - 1] === '') await deleteFiles(opts); // if path ends in `/` it's a directory request
           else await deleteFile(opts);
+          break;
+        case 'OPTIONS':
+          await getOptions(opts);
           break;
         default:
           client.emit('warn', { status: 404, message: `Unsupported req.method ${req.method}` });

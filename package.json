@@ -5,9 +5,9 @@
   "main": "./src",
   "scripts": {
     "eslint": "eslint -c .eslintrc --fix src/",
-    "cover": "nyc mocha test/",
+    "cover": "nyc mocha",
     "pretest": "npm run eslint",
-    "report": "nyc report --reporter=lcov",
+    "report": "nyc report",
     "start": "./bin/blobby server --config-dir ./test/config --config-base defaults",
     "test": "npm run cover && npm run report && npm outdated"
   },
@@ -15,7 +15,7 @@
     "blobby": "./bin/blobby"
   },
   "engines": {
-    "node": ">= 8.12"
+    "node": ">=12.0.0"
   },
   "repository": {
     "type": "git",
@@ -28,39 +28,39 @@
   },
   "homepage": "https://github.com/asilvas/blobby#readme",
   "dependencies": {
-    "agentkeepalive": "^4.1.3",
-    "async": "^3.2.0",
-    "blobby-client": "^1.4.0",
-    "bytes": "^3.1.0",
-    "chalk": "^4.1.0",
+    "agentkeepalive": "^4.2.0",
+    "async": "^3.2.3",
+    "blobby-client": "^1.4.1",
+    "bytes": "^3.1.2",
+    "chalk": "^4.1.2",
     "config-shield": "^0.2.1",
     "extend": "^3.0.2",
     "json5": "^2.1.3",
-    "mime-types": "^2.1.27",
+    "mime-types": "^2.1.34",
     "retry-fn": "^1.0.1",
-    "terminal-kit": "^1.43.0",
-    "tty-table": "^4.1.3",
-    "yargs": "^7.1.1"
+    "terminal-kit": "^2.4.0",
+    "tty-table": "^4.1.5",
+    "yargs": "^17.3.1"
   },
   "devDependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.25.0",
     "babel-cli": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "blobby-auth-header": "^0.1.0",
     "blobby-fs": "^0.2.2",
-    "chai": "^4.2.0",
-    "es6-promisify": "^6.1.1",
-    "eslint": "^7.10.0",
-    "eslint-config-godaddy": "^4.0.1",
-    "eslint-plugin-json": "^2.1.2",
-    "eslint-plugin-mocha": "^7.0.1",
-    "mocha": "^7.2.0",
+    "chai": "^4.3.6",
+    "es6-promisify": "^7.0.0",
+    "eslint": "^8.8.0",
+    "eslint-config-godaddy": "^6.0.0",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-mocha": "^10.0.3",
+    "mocha": "^9.2.0",
     "nyc": "^15.1.0",
     "proxyquire": "^2.1.3",
     "rimraf": "^3.0.2",
-    "sinon": "^9.2.0",
-    "sinon-chai": "^3.5.0"
+    "sinon": "^13.0.1",
+    "sinon-chai": "^3.7.0"
   },
   "files": [
     "bin",

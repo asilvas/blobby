@@ -3,7 +3,7 @@ const { formatDate } = require('../util/http-date');
 
 module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
   // always available
-  res.setHeader('Content-Type', realContentType);
+  if (realContentType) res.setHeader('Content-Type', realContentType);
 
   if (headers.ETag) {
     res.setHeader('ETag', headers.ETag);
