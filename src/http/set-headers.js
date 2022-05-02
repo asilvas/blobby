@@ -25,7 +25,7 @@ module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, co
   }
 
   if (urlInfo.query.download) {
-    res.setHeader('Content-Disposition', `attachment; filename="${path.basename(fileKey)}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURI(path.basename(fileKey))}"`);
   }
 
   if (typeof cors === 'object') {

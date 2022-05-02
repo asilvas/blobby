@@ -41,7 +41,6 @@ module.exports = {
     initializeGlobalAgents(config);
 
     const serverTasks = httpConfigs.map(httpConfig => createServerTask(argv, config, httpConfig));
-console.log(config)
     async.series(serverTasks, (err, servers) => {
       if (err) {
         console.error('Failed to start server successfully');
