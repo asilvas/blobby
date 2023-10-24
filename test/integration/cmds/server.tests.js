@@ -3,6 +3,7 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const cleanup = require('../../util/cleanup');
 const { readFileSync, writeFileSync, existsSync, mkdirSync } = require('fs');
+const path = require('path');
 const axios = require('axios');
 
 const getMocks = require('../../mocks');
@@ -76,8 +77,8 @@ describe('# src/cmds/server.js', async () => {
     expect(headers['content-type']).to.equal('application/json');
     expect(data.fileKey).to.equal('tmp/');
     expect(data.files.length).to.equal(2);
-    expect(data.files[0].Key).to.equal('tmp/test1.txt');
-    expect(data.files[1].Key).to.equal('tmp/test2.txt');
+    expect(data.files[0].Key).to.equal(`tmp${path.sep}test1.txt`);
+    expect(data.files[1].Key).to.equal(`tmp${path.sep}test2.txt`);
   });
 
   it('PUT test1.txt to local storage', async () => {

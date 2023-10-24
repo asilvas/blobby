@@ -27,12 +27,18 @@ module.exports = (argv, config) => {
     const urlInfo = url.parse(req.url, true, true);
     let safePathname;
     try {
-      safePathname = decodeURI(urlInfo.pathname).split('/').map(decodeURIComponent).join('/');
+      safePathname = decodeURI(urlInfo.pathname);
     } catch (ex) {
       client.emit('error', { message: `Cannot decodeURI ${urlInfo.pathname}`, stack: ex.stack || ex });
 
       res.writeHead(400); // bad request
       return void res.end();
+    }
+    try {
+      // retained for backward compatibility
+      safePathname = safePathname.split('/').map(decodeURIComponent).join('/');
+    } catch (ex) {
+      client.emit('warn', { message: `Cannot decodeURIComponent ${urlInfo.pathname}`, stack: ex.stack || ex });
     }
     const contentType = mimeTypes.lookup(path.extname(safePathname)) || 'binary/octet-stream';
     if (req.method === 'GET' && getStatic(argv, config, { req, res, urlInfo, contentType, client })) return; // handled by static handler
