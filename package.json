@@ -8,7 +8,7 @@
     "cover": "nyc mocha",
     "pretest": "npm run eslint",
     "report": "nyc report",
-    "start": "./bin/blobby server --config-dir ./test/config --config-base defaults",
+    "start": "node . server --config-dir ./test/config --config-base defaults",
     "test": "npm run cover && npm run report && npm outdated"
   },
   "bin": {

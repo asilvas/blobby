@@ -95,7 +95,7 @@ module.exports = (argv, config) => {
       }
     } catch (err) {
       const status = err.statusCode || 500;
-      client.emit(status >= 500 ? 'error' : 'warn', { status: status, message: `Error ${status}`, stack: err.stack || err });
+      client.emit(status >= 500 ? 'error' : 'warn', { url: req.url, status: status, message: `Error ${status}`, stack: err.stack || err });
       res.statusCode = status;
       return void res.end();
     }
