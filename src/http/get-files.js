@@ -37,12 +37,12 @@ module.exports = async opts => {
       return void res.end();
     }
 
+    res.setHeader('Content-Type', 'application/json');
     opts.realContentType = 'application/json';
     opts.headers = { Size: Buffer.byteLength(json) };
     opts.data = json;
     if (!compressFile(opts)) {
       // if not compressed, handle uncompressed response
-      res.setHeader('Content-Type', 'application/json');
       res.end(json);
     }
   } catch (err) {

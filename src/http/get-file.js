@@ -10,7 +10,7 @@ module.exports = async opts => {
   try {
     result = await client.getFile(storage, fileKey, { acl });
   } catch (err) {
-    err.statusCode ||= 404;
+    err.statusCode = err.statusCode || 404;
     throw err;
   }
 
