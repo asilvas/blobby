@@ -21,9 +21,6 @@ module.exports = (argv, config) => {
   }
 
   return async (req, res) => {
-    if (typeof config.httpHandler === 'function') {
-      if (config.httpHandler(req, res) === false) return; // if handled by parent ignore request
-    }
     const urlInfo = url.parse(req.url, true, true);
     let safePathname;
     try {
@@ -68,6 +65,10 @@ module.exports = (argv, config) => {
       const auth = getAuthHandler(opts);
       if (auth) {
         opts.isAuthorized = await auth;
+        req.isAuthorized = opts.isAuthorized;
+      }
+      if (typeof config.httpHandler === 'function') {
+        if (config.httpHandler(req, res) === false) return; // if handled by parent ignore request
       }
       switch (req.method) {
         case 'HEAD':
