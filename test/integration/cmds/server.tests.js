@@ -81,6 +81,18 @@ describe('# src/cmds/server.js', async () => {
     expect(data.files[1].Key).to.equal(`tmp${path.sep}test2.txt`);
   });
 
+  it('GET myVideo.mp4 with range from local storage', async () => {
+    writeFileSync('test/fs/local1/tmp/myVideo.mp4', Buffer.alloc(10000));
+    const { data, status, headers } = await axios.get('http://localhost:4080/local/tmp/myVideo.mp4', {
+      headers: { Range: 'bytes=0-100' }
+    });
+    expect(status).to.equal(206);
+    expect(headers['content-type']).to.equal('video/mp4');
+    expect(headers['content-range']).to.equal('bytes 0-100/10000');
+    expect(headers['accept-ranges']).to.equal('bytes');
+    expect(data.length).to.equal(101);
+  });
+
   it('PUT test1.txt to local storage', async () => {
     expect(existsSync('test/fs/local1/tmp/test1.txt')).to.be.false;
     const { data, status, headers } = await axios.put('http://localhost:4080/local/tmp/test1.txt', 'test1', {

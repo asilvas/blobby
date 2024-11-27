@@ -53,7 +53,6 @@ module.exports = (argv, config) => {
       storage = client.getStorage(storageId);
     } catch (ex) {
       client.emit('warn', { message: 'Storage exception', stack: ex.stack || ex });
-
       res.statusMessage = 'Invalid storage';
       res.statusCode = 404;
       return void res.end();

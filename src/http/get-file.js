@@ -1,9 +1,10 @@
 const setHeaders = require('./set-headers');
 const compressFile = require('./compress-file');
 const { parseDate } = require('../util/http-date');
+const rangeParser = require('range-parser');
 
 module.exports = async opts => {
-  const { client, storage, fileKey, res, contentType, isAuthorized } = opts;
+  const { client, storage, fileKey, res, req, contentType, isAuthorized } = opts;
 
   const acl = !isAuthorized ? 'public' : 'private'; // if auth fails, pass as public request
   let result;
@@ -32,6 +33,25 @@ module.exports = async opts => {
     // forward headers (again) as precaution
     res.statusCode = 304;
     return void res.end();
+  }
+
+  if (req.headers.range) {
+    const ranges = rangeParser(data.length, req.headers.range);
+
+    if (ranges === -1 || ranges === -2) {
+      res.statusCode = 206;
+      res.setHeader('Content-Length', 0);
+      return void res.end();
+    }
+
+    const range = ranges[0];
+    const byteOffset = range.start;
+    const byteLength = range.end - range.start + 1;
+
+    res.statusCode = 206;
+    res.setHeader('Content-Range', 'bytes ' + range.start + '-' + range.end + '/' + data.length);
+    res.setHeader('Content-Length', byteLength);
+    return void res.end(data.subarray(byteOffset, byteOffset + byteLength));
   }
 
   if (!compressFile(opts)) {

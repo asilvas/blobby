@@ -1,7 +1,7 @@
 const path = require('path');
 const { formatDate } = require('../util/http-date');
 
-module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
+module.exports = ({ storage, req, fileKey, urlInfo, res, headers, realContentType, config: { cors } }) => {
   // always available
   if (realContentType) res.setHeader('Content-Type', realContentType);
 
@@ -31,5 +31,9 @@ module.exports = ({ storage, fileKey, urlInfo, res, headers, realContentType, co
   if (typeof cors === 'object') {
     // apply cors headers
     Object.keys(cors).forEach(key => res.setHeader(key, cors[key]));
+  }
+
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    res.setHeader('Accept-Ranges', 'bytes');
   }
 };
