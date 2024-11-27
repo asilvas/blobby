@@ -6,7 +6,7 @@ module.exports = ({ req, res, realContentType, headers, data }) => {
   const supportBrotli = /\bbr\b/.test(accept);
   const shouldCompress =
     (supportGzip || supportBrotli)
-    && !/^image|^binary/i.test(realContentType) && headers.Size >= 200 // gzipping below this size can make files bigger
+    && !/^image|^binary|^video/i.test(realContentType) && headers.Size >= 200 // gzipping below this size can make files bigger
   ;
   if (!shouldCompress) return false;
 
